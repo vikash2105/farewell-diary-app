@@ -29,21 +29,19 @@ function App() {
   const { setUser, setLoading, isLoading } = useAuthStore();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const loadUser = async () => {
       try {
-        const response = await authApi.checkStatus();
-        if (response.data.success && response.data.data?.authenticated) {
-          setUser(response.data.data.user);
-        } else {
-          setUser(null);
-        }
+        const response = await authApi.getCurrentUser();
+        setUser(response.data.data);
       } catch (error) {
         setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
 
-    checkAuth();
-  }, [setUser]);
+    loadUser();
+  }, [setUser, setLoading]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -54,6 +52,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
+
           <Route
             path="/dashboard"
             element={
@@ -62,6 +61,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route path="/diary/:link" element={<PublicDiary />} />
           <Route path="/diary/:link/write" element={<WriteFarewellNote />} />
           <Route path="/404" element={<NotFound />} />

@@ -9,7 +9,7 @@ export interface AuthRequest extends Request {
     id: string;
     email: string;
     name: string;
-    profilePicture?: string;
+    profilePicture?: string | null;
   };
 }
 
@@ -21,7 +21,7 @@ export const isAuthenticated = (
   res: Response,
   next: NextFunction
 ): void => {
-  if (req.isAuthenticated && req.isAuthenticated()) {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
     return next();
   }
 
@@ -37,28 +37,13 @@ export const isAuthenticated = (
 };
 
 /**
- * Middleware to check if user is authenticated (optional)
- * Continues even if not authenticated
+ * Optional authentication middleware
+ * Attaches user if available, but does not block request
  */
 export const optionalAuth = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void => {
-  // Always continue, but user info might not be available
-  next();
-};
-
-/**
- * Middleware to attach user info from session
- */
-export const attachUser = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
-  if (req.session && (req.session as any).passport && (req.session as any).passport.user) {
-    req.user = (req.session as any).passport.user;
-  }
   next();
 };

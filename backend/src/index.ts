@@ -44,13 +44,13 @@ const startServer = async () => {
     // Graceful shutdown
     const gracefulShutdown = async (signal: string) => {
       logger.info(`${signal} received. Starting graceful shutdown...`);
-      
+
       server.close(async () => {
         logger.info('HTTP server closed');
-        
+
         await closeConnection();
         logger.info('Database connection closed');
-        
+
         logger.info('Graceful shutdown completed');
         process.exit(0);
       });
@@ -73,11 +73,10 @@ const startServer = async () => {
     });
 
     // Handle unhandled rejections
-    process.on('unhandledRejection', (reason, promise) => {
-      logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.on('unhandledRejection', (reason) => {
+      logger.error('Unhandled Rejection:', reason);
       gracefulShutdown('unhandledRejection');
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

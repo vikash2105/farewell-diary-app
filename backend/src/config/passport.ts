@@ -1,7 +1,6 @@
 import passport from 'passport';
-import { Strategy as GoogleStrategy, Profile, VerifyCallback } from 'passport-google-oauth20';
+import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import { UserService } from '../services/userService';
-import { logger } from '../utils/logger';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
@@ -11,11 +10,7 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_CALLBACK_URL) {
   throw new Error('Google OAuth environment variables are not properly configured');
 }
 
-/**
- * Configure Passport with Google OAuth strategy
- */
 export const configurePassport = (): void => {
-  // Google OAuth Strategy
   passport.use(
     new GoogleStrategy(
       {
@@ -24,56 +19,48 @@ export const configurePassport = (): void => {
         callbackURL: GOOGLE_CALLBACK_URL,
         scope: ['profile', 'email'],
       },
-      async (
-        accessToken: string,
-        refreshToken: string,
-        profile: Profile,
-        done: VerifyCallback
-      ) => {
+      async (_accessToken, _refreshToken, profile: Profile, done) => {
         try {
           const email = profile.emails?.[0]?.value;
           const name = profile.displayName || 'User';
-          const googleId = profile.id;
-          const profilePicture = profile.photos?.[0]?.value;
+          const profilePicture = profile.photos?.[0]?.value || null;
 
           if (!email) {
             return done(new Error('No email found in Google profile'), undefined);
           }
 
-          // Find or create user
-          const user = await UserService.findOrCreate(
-            email,
-            name,
-            googleId,
-            profilePicture
-          );
+          // Find existing user
+          let user = await UserService.findByEmail(email);
 
-          logger.info('User authenticated via Google:', {
-            userId: user.id,
-            email: user.email,
-          });
+          // Create if not exists
+          if (!user) {
+            user = await UserService.create({
+              email,
+              name,
+              profilePicture,
+            });
+          }
 
-          return done(null, {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            profilePicture: user.profilePicture,
-          });
+          return done(null, user);
         } catch (error) {
-          logger.error('Error in Google OAuth callback:', error);
           return done(error as Error, undefined);
         }
       }
     )
   );
 
-  // Serialize user for session
+  // Store ONLY user ID in session
   passport.serializeUser((user: any, done) => {
-    done(null, user);
+    done(null, user.id);
   });
 
-  // Deserialize user from session
-  passport.deserializeUser((user: any, done) => {
-    done(null, user);
+  // Fetch full user from DB on every request
+  passport.deserializeUser(async (id: string, done) => {
+    try {
+      const user = await UserService.findById(id);
+      done(null, user);
+    } catch (error) {
+      done(error, null);
+    }
   });
 };

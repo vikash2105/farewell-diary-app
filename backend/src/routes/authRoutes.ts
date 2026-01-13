@@ -27,10 +27,10 @@ router.get(
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    failureRedirect: `${FRONTEND_URL}/login?error=auth_failed`,
+    failureRedirect: FRONTEND_URL,
   }),
   (req, res) => {
-    // Successful authentication
+    // Successful authentication → redirect to dashboard
     res.redirect(`${FRONTEND_URL}/dashboard`);
   }
 );

@@ -28,6 +28,7 @@ export class UserService {
         .from(users)
         .where(eq(users.email, email))
         .limit(1);
+
       return user || null;
     } catch (error) {
       logger.error('Error finding user by email:', error);
@@ -45,6 +46,7 @@ export class UserService {
         .from(users)
         .where(eq(users.googleId, googleId))
         .limit(1);
+
       return user || null;
     } catch (error) {
       logger.error('Error finding user by Google ID:', error);
@@ -66,7 +68,15 @@ export class UserService {
         })
         .returning();
 
-      logger.info('New user created:', { userId: newUser.id, email: newUser.email });
+      if (!newUser) {
+        throw new ApiError(500, 'User creation failed');
+      }
+
+      logger.info('New user created', {
+        userId: newUser.id,
+        email: newUser.email,
+      });
+
       return newUser;
     } catch (error) {
       logger.error('Error creating user:', error);
@@ -92,7 +102,7 @@ export class UserService {
         throw new ApiError(404, 'User not found');
       }
 
-      logger.info('User updated:', { userId: id });
+      logger.info('User updated', { userId: id });
       return updatedUser;
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -102,32 +112,37 @@ export class UserService {
   }
 
   /**
-   * Find or create user (useful for OAuth)
+   * Find or create user (USED BY GOOGLE OAUTH)
+   * This is the MOST IMPORTANT method for auth stability
    */
   static async findOrCreate(
     email: string,
     name: string,
     googleId?: string,
-    profilePicture?: string
+    profilePicture?: string | null
   ): Promise<User> {
     try {
-      // Try to find by email first
-      let user = await this.findByEmail(email);
+      let user: User | null = null;
 
-      if (!user && googleId) {
-        // Try to find by Google ID
+      // 1. Try find by Google ID first (most reliable)
+      if (googleId) {
         user = await this.findByGoogleId(googleId);
       }
 
+      // 2. If not found, try by email
+      if (!user) {
+        user = await this.findByEmail(email);
+      }
+
+      // 3. If found, ensure googleId is linked
       if (user) {
-        // Update Google ID if not set
         if (googleId && !user.googleId) {
           user = await this.update(user.id, { googleId });
         }
         return user;
       }
 
-      // Create new user
+      // 4. If still not found, create new user
       return await this.create({
         email,
         name,
@@ -147,7 +162,7 @@ export class UserService {
   static async deactivate(id: string): Promise<void> {
     try {
       await this.update(id, { isActive: false });
-      logger.info('User deactivated:', { userId: id });
+      logger.info('User deactivated', { userId: id });
     } catch (error) {
       logger.error('Error deactivating user:', error);
       throw new ApiError(500, 'Error deactivating user');
