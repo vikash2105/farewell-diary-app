@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { DiaryController } from '../controllers/diaryController';
-import { isAuthenticated, optionalAuth } from '../middleware/auth';
+import { isAuthenticated } from '../middleware/auth';
 import { validateBody } from '../middleware/validator';
 import { createDiarySchema } from '../utils/validation';
+import { sanitizeInput } from '../middleware/sanitize';
+import { limitRequestSize, LIMITS } from '../middleware/requestSizeLimit';
 import { z } from 'zod';
 
 const router = Router();
@@ -11,10 +13,14 @@ const router = Router();
  * @route   POST /api/v1/diary
  * @desc    Create a new diary
  * @access  Private
+ * 
+ * UPDATED: Added sanitization and request size limit
  */
 router.post(
   '/',
   isAuthenticated,
+  limitRequestSize(LIMITS.DIARY),
+  sanitizeInput,
   validateBody(createDiarySchema),
   DiaryController.createDiary
 );
@@ -35,19 +41,26 @@ router.get('/me/notes', isAuthenticated, DiaryController.getMyDiaryNotes);
 
 /**
  * @route   GET /api/v1/diary/:link
- * @desc    Get diary by unique link
+ * @desc    Get diary info for public contributors (write-only view)
  * @access  Public
+ * 
+ * UPDATED: Now returns minimal data only (title, description)
+ * Does NOT return: id, uniqueLink, settings, userId
  */
-router.get('/:link', optionalAuth, DiaryController.getDiaryByLink);
+router.get('/:link', DiaryController.getDiaryByLinkForPublic);
 
 /**
  * @route   PUT /api/v1/diary/:id
  * @desc    Update diary
  * @access  Private
+ * 
+ * UPDATED: Added sanitization and request size limit
  */
 router.put(
   '/:id',
   isAuthenticated,
+  limitRequestSize(LIMITS.DIARY),
+  sanitizeInput,
   validateBody(
     z.object({
       title: z.string().min(3).max(255).optional(),

@@ -1,6 +1,6 @@
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../db';
-import { farewellNotes, FarewellNote, NewFarewellNote } from '../db/schema';
+import { farewellNotes, diaries, FarewellNote, NewFarewellNote } from '../db/schema';
 import { logger } from '../utils/logger';
 import { ApiError } from '../middleware/errorHandler';
 import { encrypt, decrypt } from '../utils/encryption';
@@ -41,6 +41,7 @@ export class FarewellNoteService {
         noteId: newNote.id,
         diaryId,
         isAnonymous,
+        // Do NOT log authorEmail or other PII
       });
 
       return newNote;
@@ -113,25 +114,57 @@ export class FarewellNoteService {
   }
 
   /**
-   * Delete a note (only by author or diary owner)
+   * Delete a note (author OR diary owner can delete)
+   * 
+   * FIXED: Now allows both note author AND diary owner to delete notes
+   * This gives diary owners moderation capabilities
    */
   static async delete(noteId: string, userId: string): Promise<void> {
     try {
-      const [deletedNote] = await db
-        .delete(farewellNotes)
-        .where(
-          and(
-            eq(farewellNotes.id, noteId),
-            eq(farewellNotes.authorId, userId)
-          )
-        )
-        .returning();
+      // First, get the note to check permissions
+      const [note] = await db
+        .select()
+        .from(farewellNotes)
+        .where(eq(farewellNotes.id, noteId))
+        .limit(1);
 
-      if (!deletedNote) {
-        throw new ApiError(404, 'Note not found or unauthorized');
+      if (!note) {
+        throw new ApiError(404, 'Note not found');
       }
 
-      logger.info('Farewell note deleted:', { noteId });
+      // Get the diary to check if user is the owner
+      const [diary] = await db
+        .select()
+        .from(diaries)
+        .where(eq(diaries.id, note.diaryId))
+        .limit(1);
+
+      if (!diary) {
+        throw new ApiError(404, 'Associated diary not found');
+      }
+
+      // Allow deletion if user is either the note author OR the diary owner
+      const isAuthor = note.authorId === userId;
+      const isOwner = diary.userId === userId;
+
+      if (!isAuthor && !isOwner) {
+        throw new ApiError(
+          403,
+          'You can only delete your own notes or notes in your diary'
+        );
+      }
+
+      // Perform the deletion
+      await db
+        .delete(farewellNotes)
+        .where(eq(farewellNotes.id, noteId));
+
+      logger.info('Farewell note deleted:', {
+        noteId,
+        deletedBy: userId,
+        deletedByOwner: isOwner,
+        deletedByAuthor: isAuthor,
+      });
     } catch (error) {
       if (error instanceof ApiError) throw error;
       logger.error('Error deleting note:', error);
