@@ -2,8 +2,10 @@ import dotenv from 'dotenv';
 import { createApp } from './app';
 import { testConnection, closeConnection } from './db';
 import { logger } from './utils/logger';
+import { validateEnv } from './config/env';
 
 // Load environment variables
+validateEnv();
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
