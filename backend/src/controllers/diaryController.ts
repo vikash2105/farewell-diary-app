@@ -89,23 +89,30 @@ export class DiaryController {
   }
 
   /**
-   * Get diary by unique link (public access)
+   * Get diary by unique link (PUBLIC ACCESS - write-only view)
+   * 
+   * FIXED: Only returns minimal data needed for contributors to write notes
+   * Does NOT expose: id, uniqueLink, settings, userId, or any sensitive info
    */
-  static async getDiaryByLink(req: AuthRequest, res: Response): Promise<void> {
+  static async getDiaryByLinkForPublic(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { link } = req.params;
 
       const diary = await DiaryService.validateAccess(link);
 
-      // Don't include sensitive information for public access
+      // Return ONLY the information needed to display the public page
+      // Contributors should NOT see internal IDs, settings, or owner info
       res.json({
         success: true,
         data: {
-          id: diary.id,
           title: diary.title,
           description: diary.description,
-          settings: diary.settings,
-          uniqueLink: diary.uniqueLink,
+          // Explicitly DO NOT return:
+          // - id (prevents API manipulation)
+          // - uniqueLink (user already has it)
+          // - settings (internal configuration)
+          // - userId (privacy)
+          // - createdAt/updatedAt (unnecessary)
         },
       });
     } catch (error) {
@@ -166,6 +173,8 @@ export class DiaryController {
 
   /**
    * Update diary information
+   * 
+   * FIXED: Parameter order now matches service method signature
    */
   static async updateDiary(req: AuthRequest, res: Response): Promise<void> {
     try {
@@ -176,7 +185,8 @@ export class DiaryController {
       const { id } = req.params;
       const { title, description, settings } = req.body;
 
-      const updatedDiary = await DiaryService.update(req.user.id, id, {
+      // FIXED: Correct parameter order (id, userId, updates)
+      const updatedDiary = await DiaryService.update(id, req.user.id, {
         title,
         description,
         settings,
