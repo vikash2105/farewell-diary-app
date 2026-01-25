@@ -1,15 +1,11 @@
-import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+import { Request, Response } from 'express';
 import { UserService } from '../services/userService';
 import { logger } from '../utils/logger';
 
 export class AuthController {
-  /**
-   * Get current user information
-   */
-  static async getCurrentUser(req: AuthRequest, res: Response): Promise<void> {
+  static async getCurrentUser(req: Request, res: Response): Promise<void> {
     try {
-      if (!req.user || !req.user.id) {
+      if (!req.user?.id) {
         res.status(401).json({
           success: false,
           error: 'Not authenticated',
@@ -46,10 +42,7 @@ export class AuthController {
     }
   }
 
-  /**
-   * Logout user
-   */
-  static async logout(req: AuthRequest, res: Response): Promise<void> {
+  static async logout(req: Request, res: Response): Promise<void> {
     try {
       req.logout((err) => {
         if (err) {
@@ -71,7 +64,7 @@ export class AuthController {
             return;
           }
 
-          res.clearCookie('farewell.sid'); // MUST match session name
+          res.clearCookie('farewell.sid');
           res.json({
             success: true,
             message: 'Logged out successfully',
@@ -87,14 +80,11 @@ export class AuthController {
     }
   }
 
-  /**
-   * Check authentication status
-   */
-  static async checkAuth(req: AuthRequest, res: Response): Promise<void> {
+  static async checkAuth(req: Request, res: Response): Promise<void> {
     res.json({
       success: true,
-      authenticated: req.isAuthenticated ? req.isAuthenticated() : false,
-      user: req.user || null,
+      authenticated: req.isAuthenticated?.() ?? false,
+      user: req.user ?? null,
     });
   }
 }

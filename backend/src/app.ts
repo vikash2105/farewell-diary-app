@@ -7,8 +7,10 @@ import passport from 'passport';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import 'express-async-errors';
-import connectPgSimple from 'connect-pg-simple';
-import pg from 'pg';
+
+// ✅ CommonJS imports (Render-safe)
+const connectPgSimple = require('connect-pg-simple');
+const { Pool } = require('pg');
 
 import { configurePassport } from './config/passport';
 import routes from './routes';
@@ -73,7 +75,7 @@ export const createApp = (): Application => {
   // ==============================
   // SESSION CONFIGURATION (CRITICAL)
   // ==============================
-  const pgPool = new pg.Pool({
+  const pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
   });
 
@@ -90,7 +92,7 @@ export const createApp = (): Application => {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // true only in prod (https)
+        secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       },

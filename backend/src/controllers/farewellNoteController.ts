@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+import { Request, Response } from 'express';
 import { FarewellNoteService } from '../services/farewellNoteService';
 import { DiaryService } from '../services/diaryService';
 import { logger } from '../utils/logger';
@@ -9,7 +8,7 @@ export class FarewellNoteController {
   /**
    * Create a farewell note for a diary
    */
-  static async createNote(req: AuthRequest, res: Response): Promise<void> {
+  static async createNote(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user) {
         throw new ApiError(401, 'Authentication required to write a note');
@@ -18,7 +17,6 @@ export class FarewellNoteController {
       const { link } = req.params;
       const { content, fontStyle, isAnonymous } = req.body;
 
-      // Validate diary access
       const diary = await DiaryService.validateAccess(link);
 
       // Prevent diary owner from writing to their own diary
@@ -26,7 +24,6 @@ export class FarewellNoteController {
         throw new ApiError(403, 'You cannot write a note to your own diary');
       }
 
-      // Check if user has already written a note
       const hasWritten = await FarewellNoteService.hasUserWrittenNote(
         diary.id,
         req.user.email
@@ -72,12 +69,12 @@ export class FarewellNoteController {
   /**
    * Check if current user has written a note
    */
-  static async checkUserNote(req: AuthRequest, res: Response): Promise<void> {
+  static async checkUserNote(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user) {
         res.json({
           success: true,
-          data: { hasWritten: false },
+          data: { hasWritten: false, isOwner: false },
         });
         return;
       }
@@ -120,7 +117,7 @@ export class FarewellNoteController {
   /**
    * Delete a note (author only)
    */
-  static async deleteNote(req: AuthRequest, res: Response): Promise<void> {
+  static async deleteNote(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user) {
         throw new ApiError(401, 'Authentication required');
