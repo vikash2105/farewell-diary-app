@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Heart, BookOpen, Shield, Users } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { authApi } from '../api/client';

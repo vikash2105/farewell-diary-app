@@ -7,7 +7,7 @@ import { useAuthStore } from '../stores/authStore';
 export default function PublicDiary() {
   const { link } = useParams<{ link: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+useAuthStore();
 
   const { data: diaryData, isLoading } = useQuery({
     queryKey: ['publicDiary', link],
