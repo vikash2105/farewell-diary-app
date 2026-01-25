@@ -32,7 +32,7 @@ function App() {
     const loadUser = async () => {
       try {
         const response = await authApi.getCurrentUser();
-        setUser(response.data.data);
+        setUser(response.data.data ?? null);
       } catch (error) {
         setUser(null);
       } finally {
