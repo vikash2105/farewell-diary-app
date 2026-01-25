@@ -24,14 +24,15 @@ export default function Dashboard() {
   });
 
   // Fetch notes ONLY if diary exists
-  const { data: notesData } = useQuery({
-    queryKey: ['myNotes', diaryData?.diary?.id],
-    queryFn: async () => {
-      const res = await diaryApi.getMyNotes(diaryData!.diary.id);
-      return res.data.data;
-    },
-    enabled: !!diaryData?.diary?.id,
-  });
+const { data: notesData } = useQuery({
+  queryKey: ['myNotes'],
+  queryFn: async () => {
+    const res = await diaryApi.getMyNotes();
+    return res.data.data;
+  },
+  enabled: !!diaryData?.diary,
+});
+
 
   const handleLogout = async () => {
     try {
