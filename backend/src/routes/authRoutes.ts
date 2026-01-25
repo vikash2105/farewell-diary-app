@@ -25,7 +25,7 @@ router.get(
   passport.authenticate('google', {
     failureRedirect: FRONTEND_URL,
   }),
-  (req: Request, res: Response) => {
+  (_req: Request, res: Response) => {
     res.redirect(`${FRONTEND_URL}/dashboard`);
   }
 );

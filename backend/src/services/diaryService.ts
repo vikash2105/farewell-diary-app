@@ -1,6 +1,6 @@
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db';
-import { diaries, Diary, NewDiary } from '../db/schema';
+import { diaries, Diary } from '../db/schema';
 import { logger } from '../utils/logger';
 import { ApiError } from '../middleware/errorHandler';
 import { generateUniqueLink, generateShareableUrl } from '../utils/linkGenerator';

@@ -5,13 +5,12 @@ import farewellNoteRoutes from './farewellNoteRoutes';
 
 const router = Router();
 
-// Mount routes
 router.use('/auth', authRoutes);
 router.use('/diary', diaryRoutes);
 router.use('/notes', farewellNoteRoutes);
 
 // Health check endpoint
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({
     success: true,
     message: 'Farewell Diary API is running',
