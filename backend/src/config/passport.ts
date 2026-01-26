@@ -2,12 +2,16 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import { UserService } from '../services/userService';
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
-const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL!;
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  BACKEND_URL,
+} = process.env;
 
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_CALLBACK_URL) {
-  throw new Error('Google OAuth environment variables are not properly configured');
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !BACKEND_URL) {
+  throw new Error(
+    'Missing env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BACKEND_URL'
+  );
 }
 
 export const configurePassport = (): void => {
@@ -16,23 +20,22 @@ export const configurePassport = (): void => {
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: GOOGLE_CALLBACK_URL,
-        scope: ['profile', 'email'],
+        callbackURL: `${BACKEND_URL}/api/v1/auth/google/callback`,
       },
       async (_accessToken, _refreshToken, profile: Profile, done) => {
         try {
           const email = profile.emails?.[0]?.value;
-          const name = profile.displayName || 'User';
-          const profilePicture = profile.photos?.[0]?.value || null;
-
           if (!email) {
-            return done(new Error('No email found in Google profile'), undefined);
+            return done(new Error('No email from Google'), undefined);
           }
 
-          // Find existing user
+          const name = profile.displayName || 'User';
+          const profilePicture = profile.photos?.[0]?.value ?? null;
+
+          // ✅ find existing user
           let user = await UserService.findByEmail(email);
 
-          // Create if not exists
+          // ✅ create if not exists
           if (!user) {
             user = await UserService.create({
               email,
@@ -41,26 +44,31 @@ export const configurePassport = (): void => {
             });
           }
 
-          return done(null, user);
-        } catch (error) {
-          return done(error as Error, undefined);
+          /**
+           * Attach minimal, typed-safe user object
+           * Matches Express.Request.user typing
+           */
+          return done(null, {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            profilePicture: user.profilePicture,
+          });
+        } catch (err) {
+          return done(err as Error, undefined);
         }
       }
     )
   );
 
-  // Store ONLY user ID in session
+  /**
+   * Store entire safe user object in session
+   */
   passport.serializeUser((user: any, done) => {
-    done(null, user.id);
+    done(null, user);
   });
 
-  // Fetch full user from DB on every request
-  passport.deserializeUser(async (id: string, done) => {
-    try {
-      const user = await UserService.findById(id);
-      done(null, user);
-    } catch (error) {
-      done(error, null);
-    }
+  passport.deserializeUser((user: any, done) => {
+    done(null, user);
   });
 };
