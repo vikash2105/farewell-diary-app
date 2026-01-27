@@ -9,13 +9,14 @@ if (!connectionString) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-// Enhanced connection config for production
 const queryClient = postgres(connectionString, {
   max: 10,
   idle_timeout: 20,
   connect_timeout: 10,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
-  onnotice: () => {}, // Suppress notices
+  ssl: process.env.NODE_ENV === 'production'
+    ? { rejectUnauthorized: false }
+    : false,
+  onnotice: () => {},
 });
 
 export const db = drizzle(queryClient, { schema });
