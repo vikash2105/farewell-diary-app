@@ -1,12 +1,16 @@
 import dotenv from 'dotenv';
+
+// ⚠️ CRITICAL: Load .env FIRST, before any other imports that use process.env
+dotenv.config();
+
 import { createApp } from './app';
 import { testConnection, closeConnection } from './db';
+import { runMigrations } from './db/migrate';
 import { logger } from './utils/logger';
 import { validateEnv } from './config/env';
 
-// Load environment variables
+// NOW validate env (after loading)
 validateEnv();
-dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -16,17 +20,26 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
  */
 const startServer = async () => {
   try {
-    // Test database connection
+    // 1. Test database connection
     const dbConnected = await testConnection();
     if (!dbConnected) {
       logger.error('Failed to connect to database. Exiting...');
       process.exit(1);
     }
 
-    // Create Express app
+    // 2. Run migrations BEFORE starting server
+    logger.info('🔄 Checking database schema...');
+    try {
+      await runMigrations();
+    } catch (migrationError) {
+      logger.error('❌ Failed to run migrations. Exiting...', migrationError);
+      process.exit(1);
+    }
+
+    // 3. Create Express app
     const app = createApp();
 
-    // Start listening
+    // 4. Start listening
     const server = app.listen(PORT, () => {
       logger.info(`
 ╔═══════════════════════════════════════════════════════════╗

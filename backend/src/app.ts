@@ -35,12 +35,14 @@ export const createApp = (): Application => {
   // ==============================
   // CORS (AUTH CRITICAL)
   // ==============================
-  app.use(
-    cors({
-      origin: process.env.FRONTEND_URL,
-      credentials: true,
-    })
-  );
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -72,25 +74,28 @@ export const createApp = (): Application => {
   });
 
   app.use(
-    session({
-      name: 'farewell.sid',
-      store: new PgSession({
-        pool: pgPool,
-        tableName: 'sessions',
-        createTableIfMissing: true,
-      }),
-      secret: process.env.SESSION_SECRET!,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        secure: true, // Render + Vercel = HTTPS
-        sameSite: 'none',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      },
-    })
-  );
-
+  session({
+    name: 'farewell.sid',
+    store: new PgSession({
+      pool: pgPool,
+      tableName: 'sessions',
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET!,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      domain: process.env.NODE_ENV === 'production' 
+        ? undefined // Let browser determine domain
+        : undefined,
+    },
+    proxy: true, // IMPORTANT for Render/Vercel
+  })
+);
   // ==============================
   // PASSPORT
   // ==============================

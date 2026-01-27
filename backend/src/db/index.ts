@@ -9,17 +9,17 @@ if (!connectionString) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-// Create postgres connection
+// Enhanced connection config for production
 const queryClient = postgres(connectionString, {
   max: 10,
   idle_timeout: 20,
   connect_timeout: 10,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
+  onnotice: () => {}, // Suppress notices
 });
 
-// Create drizzle instance
 export const db = drizzle(queryClient, { schema });
 
-// Test database connection
 export const testConnection = async (): Promise<boolean> => {
   try {
     await queryClient`SELECT 1`;
@@ -31,7 +31,6 @@ export const testConnection = async (): Promise<boolean> => {
   }
 };
 
-// Graceful shutdown
 export const closeConnection = async (): Promise<void> => {
   try {
     await queryClient.end();
