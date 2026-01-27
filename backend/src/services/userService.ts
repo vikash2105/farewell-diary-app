@@ -6,15 +6,21 @@ import { ApiError } from '../middleware/errorHandler';
 
 export class UserService {
   /**
-   * Find user by ID
+   * Find user by ID (PASSPORT SAFE)
+   * ⚠️ Must NOT throw for auth flow
    */
   static async findById(id: string): Promise<User | null> {
     try {
-      const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
-      return user || null;
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+
+      return user ?? null;
     } catch (error) {
       logger.error('Error finding user by ID:', error);
-      throw new ApiError(500, 'Error retrieving user');
+      return null; // 🔑 critical for passport
     }
   }
 
@@ -29,10 +35,10 @@ export class UserService {
         .where(eq(users.email, email))
         .limit(1);
 
-      return user || null;
+      return user ?? null;
     } catch (error) {
       logger.error('Error finding user by email:', error);
-      throw new ApiError(500, 'Error retrieving user');
+      return null;
     }
   }
 
@@ -47,10 +53,10 @@ export class UserService {
         .where(eq(users.googleId, googleId))
         .limit(1);
 
-      return user || null;
+      return user ?? null;
     } catch (error) {
       logger.error('Error finding user by Google ID:', error);
-      throw new ApiError(500, 'Error retrieving user');
+      return null;
     }
   }
 
@@ -63,13 +69,14 @@ export class UserService {
         .insert(users)
         .values({
           ...userData,
+          isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
         .returning();
 
       if (!newUser) {
-        throw new ApiError(500, 'User creation failed');
+        throw new Error('Insert returned no user');
       }
 
       logger.info('New user created', {
@@ -102,7 +109,6 @@ export class UserService {
         throw new ApiError(404, 'User not found');
       }
 
-      logger.info('User updated', { userId: id });
       return updatedUser;
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -112,37 +118,30 @@ export class UserService {
   }
 
   /**
-   * Find or create user (USED BY GOOGLE OAUTH)
-   * This is the MOST IMPORTANT method for auth stability
+   * ✅ FIND OR CREATE (GOOGLE OAUTH – FINAL)
    */
   static async findOrCreate(
     email: string,
     name: string,
-    googleId?: string,
+    googleId: string,
     profilePicture?: string | null
   ): Promise<User> {
     try {
-      let user: User | null = null;
+      // 1️⃣ Google ID match (best case)
+      let user = await this.findByGoogleId(googleId);
+      if (user) return user;
 
-      // 1. Try find by Google ID first (most reliable)
-      if (googleId) {
-        user = await this.findByGoogleId(googleId);
-      }
-
-      // 2. If not found, try by email
-      if (!user) {
-        user = await this.findByEmail(email);
-      }
-
-      // 3. If found, ensure googleId is linked
+      // 2️⃣ Email match (existing account)
+      user = await this.findByEmail(email);
       if (user) {
-        if (googleId && !user.googleId) {
+        // link Google account
+        if (!user.googleId) {
           user = await this.update(user.id, { googleId });
         }
         return user;
       }
 
-      // 4. If still not found, create new user
+      // 3️⃣ Create new user
       return await this.create({
         email,
         name,

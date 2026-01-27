@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -8,7 +8,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import 'express-async-errors';
 
-// ✅ CommonJS imports (Render-safe)
+// ✅ Render-safe CommonJS imports
 const connectPgSimple = require('connect-pg-simple');
 const { Pool } = require('pg');
 
@@ -19,16 +19,12 @@ import { logger } from './utils/logger';
 
 const PgSession = connectPgSimple(session);
 
-/**
- * Create and configure Express application
- */
 export const createApp = (): Application => {
   const app = express();
 
-  // Trust proxy (important for cookies behind proxy)
+  // Trust proxy (REQUIRED for Render / cookies)
   app.set('trust proxy', 1);
 
-  // Security middleware
   app.use(
     helmet({
       contentSecurityPolicy: false,
@@ -37,23 +33,19 @@ export const createApp = (): Application => {
   );
 
   // ==============================
-  // CORS (VERY IMPORTANT FOR AUTH)
+  // CORS (AUTH CRITICAL)
   // ==============================
   app.use(
     cors({
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+      origin: process.env.FRONTEND_URL,
       credentials: true,
     })
   );
 
-  // Body parsing
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-  // Compression
   app.use(compression());
 
-  // HTTP logger
   app.use(
     morgan('combined', {
       stream: {
@@ -62,21 +54,21 @@ export const createApp = (): Application => {
     })
   );
 
-  // Rate limiting
   const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
-    message: 'Too many requests from this IP, please try again later.',
+    windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 900000),
+    max: Number(process.env.RATE_LIMIT_MAX_REQUESTS || 100),
     standardHeaders: true,
     legacyHeaders: false,
   });
+
   app.use('/api/', limiter);
 
   // ==============================
-  // SESSION CONFIGURATION (CRITICAL)
+  // SESSION (SUPABASE READY)
   // ==============================
   const pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   });
 
   app.use(
@@ -92,15 +84,15 @@ export const createApp = (): Application => {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        secure: true, // Render + Vercel = HTTPS
+        sameSite: 'none',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       },
     })
   );
 
   // ==============================
-  // PASSPORT SETUP
+  // PASSPORT
   // ==============================
   configurePassport();
   app.use(passport.initialize());
@@ -112,8 +104,7 @@ export const createApp = (): Application => {
   const API_VERSION = process.env.API_VERSION || 'v1';
   app.use(`/api/${API_VERSION}`, routes);
 
-  // Root endpoint
-  app.get('/', (_req, res) => {
+  app.get('/', (_req: Request, res: Response) => {
     res.json({
       success: true,
       message: 'Welcome to Farewell Diary API',
@@ -121,10 +112,7 @@ export const createApp = (): Application => {
     });
   });
 
-  // 404 handler
   app.use(notFoundHandler);
-
-  // Global error handler
   app.use(errorHandler);
 
   return app;
