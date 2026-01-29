@@ -25,7 +25,7 @@ const PgSession = connectPgSimple(session);
 export const createApp = (): Application => {
   const app = express();
 
-  // REQUIRED for Render / proxies
+  // ✅ REQUIRED for Render / reverse proxy
   app.set("trust proxy", 1);
 
   // ==============================
@@ -43,7 +43,7 @@ export const createApp = (): Application => {
   // ==============================
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin: env.FRONTEND_URL, // EXACT vercel URL
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -69,13 +69,14 @@ export const createApp = (): Application => {
   );
 
   // ==============================
-  // SESSION STORE (PostgreSQL)
+  // POSTGRES SESSION STORE
   // ==============================
   const pgPool = new Pool({
     connectionString: env.DATABASE_URL,
-    ssl: env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
+    ssl:
+      env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false,
   });
 
   app.use(
@@ -92,8 +93,8 @@ export const createApp = (): Application => {
       proxy: true,
       cookie: {
         httpOnly: true,
-        secure: env.NODE_ENV === "production",
-        sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+        secure: true,        // 🔥 MUST be true on Render/Vercel
+        sameSite: "none",    // 🔥 REQUIRED for cross-domain cookies
         maxAge: 7 * 24 * 60 * 60 * 1000,
       },
     })
