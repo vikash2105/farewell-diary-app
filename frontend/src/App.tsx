@@ -11,6 +11,8 @@ import Dashboard from './pages/Dashboard';
 import PublicDiary from './pages/PublicDiary';
 import WriteFarewellNote from './pages/WriteFarewellNote';
 import NotFound from './pages/NotFound';
+import Homepage from './pages/Homepage';
+import Profile from './pages/Profile';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -51,7 +53,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<Homepage />} />
 
           <Route
             path="/dashboard"
