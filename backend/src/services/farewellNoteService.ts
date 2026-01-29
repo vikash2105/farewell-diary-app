@@ -2,13 +2,26 @@ import { eq, and } from "drizzle-orm";
 import { db } from "../db";
 import { farewellNotes } from "../db/schema";
 import { ApiError } from "../middleware/errorHandler";
+import { encrypt, decrypt } from "../utils/encryption";
 
 export class FarewellNoteService {
-  static async getByDiaryId(diaryId: string) {
-    return db
+  // 🔐 OWNER ACCESS — DECRYPT CONTENT
+  static async getByDiaryId(diaryId: string, isOwner = false) {
+    const notes = await db
       .select()
       .from(farewellNotes)
       .where(eq(farewellNotes.diaryId, diaryId));
+
+    if (!isOwner) {
+      // Public viewers never see content
+      return notes.map(({ encryptedContent, ...rest }) => rest);
+    }
+
+    // Owner sees decrypted content
+    return notes.map((note) => ({
+      ...note,
+      content: decrypt(note.encryptedContent),
+    }));
   }
 
   static async countByDiaryId(diaryId: string): Promise<number> {
@@ -48,6 +61,8 @@ export class FarewellNoteService {
       throw new ApiError(400, "Note content cannot be empty");
     }
 
+    const encrypted = encrypt(content);
+
     const [note] = await db
       .insert(farewellNotes)
       .values({
@@ -55,7 +70,7 @@ export class FarewellNoteService {
         authorId,
         authorName,
         authorEmail,
-        encryptedContent: content,
+        encryptedContent: encrypted, // 🔐 FIXED
         fontStyle: fontStyle ?? "default",
         isAnonymous: !!isAnonymous,
         createdAt: new Date(),

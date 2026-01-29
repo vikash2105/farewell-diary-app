@@ -11,14 +11,20 @@ declare global {
 }
 
 /**
- * Require authentication (session-based)
+ * Require authentication (Passport-based)
+ * 
+ * CRITICAL FIX:
+ * - Passport stores user in req.user (via deserializeUser)
+ * - We check req.isAuthenticated() which relies on req.user
+ * - Then populate req.userId, req.userEmail, req.userName for backward compatibility
  */
 export const requireAuth = (
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.session?.userId) {
+  // ✅ Check Passport's isAuthenticated (which checks req.user)
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
     res.status(401).json({
       success: false,
       error: "Authentication required",
@@ -27,13 +33,20 @@ export const requireAuth = (
     return;
   }
 
-  req.userId = String(req.session.userId);
-  req.userEmail = req.session.userEmail
-    ? String(req.session.userEmail)
-    : undefined;
-  req.userName = req.session.userName
-    ? String(req.session.userName)
-    : undefined;
+  // ✅ req.user is populated by Passport after deserializeUser
+  if (!req.user?.id) {
+    res.status(401).json({
+      success: false,
+      error: "Authentication required",
+      message: "User session is invalid",
+    });
+    return;
+  }
+
+  // ✅ Populate helper properties for backward compatibility
+  req.userId = String(req.user.id);
+  req.userEmail = req.user.email ? String(req.user.email) : undefined;
+  req.userName = req.user.name ? String(req.user.name) : undefined;
 
   next();
 };
@@ -46,14 +59,10 @@ export const optionalAuth = (
   _res: Response,
   next: NextFunction
 ): void => {
-  if (req.session?.userId) {
-    req.userId = String(req.session.userId);
-    req.userEmail = req.session.userEmail
-      ? String(req.session.userEmail)
-      : undefined;
-    req.userName = req.session.userName
-      ? String(req.session.userName)
-      : undefined;
+  if (req.isAuthenticated && req.isAuthenticated() && req.user?.id) {
+    req.userId = String(req.user.id);
+    req.userEmail = req.user.email ? String(req.user.email) : undefined;
+    req.userName = req.user.name ? String(req.user.name) : undefined;
   }
 
   next();

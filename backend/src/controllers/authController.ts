@@ -64,7 +64,13 @@ export class AuthController {
             return;
           }
 
-          res.clearCookie('farewell.sid');
+          // ✅ CRITICAL FIX: Clear cookie with same options as when it was set
+          res.clearCookie('farewell.sid', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+          });
+          
           res.json({
             success: true,
             message: 'Logged out successfully',
