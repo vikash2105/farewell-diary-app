@@ -1,37 +1,63 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { logger } from '../utils/logger';
+/**
+ * Authentication Middleware
+ * Verifies user is authenticated before accessing protected routes
+ */
+
+import { Request, Response, NextFunction } from 'express';
 
 /**
- * Middleware to check if user is authenticated
+ * Extend Express Request type to include session data
  */
-export const isAuthenticated: RequestHandler = (
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+      userEmail?: string;
+      userName?: string;
+    }
+  }
+}
+
+/**
+ * Require authentication middleware
+ * Checks if user is logged in via session
+ */
+export const requireAuth = (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
-  if (req.isAuthenticated?.() && req.user) {
-    return next();
+): void => {
+  // Check if user session exists
+  if (!req.session || !req.session.userId) {
+    res.status(401).json({
+      error: 'Authentication required',
+      message: 'Please log in to access this resource',
+    });
+    return;
   }
 
-  logger.warn('Unauthorized access attempt', {
-    path: req.path,
-    ip: req.ip,
-  });
+  // Attach user data to request for easy access
+  req.userId = req.session.userId;
+  req.userEmail = req.session.userEmail;
+  req.userName = req.session.userName;
 
-  res.status(401).json({
-    success: false,
-    error: 'Unauthorized. Please login first.',
-  });
+  next();
 };
 
 /**
  * Optional authentication middleware
- * Attaches user if available, but does not block request
+ * Attaches user data if logged in, but doesn't require it
  */
-export const optionalAuth: RequestHandler = (
-  _req: Request,
-  _res: Response,
+export const optionalAuth = (
+  req: Request,
+  res: Response,
   next: NextFunction
-) => {
+): void => {
+  if (req.session && req.session.userId) {
+    req.userId = req.session.userId;
+    req.userEmail = req.session.userEmail;
+    req.userName = req.session.userName;
+  }
+
   next();
 };
