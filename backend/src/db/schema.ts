@@ -117,12 +117,66 @@ export const sessions = pgTable("sessions", {
 
 /**
  * =========================
+ * TESTIMONIALS TABLE (NEW)
+ * =========================
+ */
+export const testimonials = pgTable("testimonials", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  // Optional - can be null for anonymous testimonials
+  userId: uuid("user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+
+  name: varchar("name", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  isApproved: boolean("is_approved").notNull().default(false), // Admin moderation
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/**
+ * =========================
+ * DONATIONS TABLE (NEW)
+ * =========================
+ */
+export const donations = pgTable("donations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  // Optional - can be null for anonymous donations
+  userId: uuid("user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+
+  // Display information (sanitized)
+  displayName: varchar("display_name", { length: 255 }).notNull(),
+  amount: varchar("amount", { length: 50 }).notNull(), // e.g., "$10", "₹500"
+  message: text("message"), // Optional message
+
+  // Internal tracking (NOT exposed publicly)
+  paymentProvider: varchar("payment_provider", { length: 50 }), // "stripe", "razorpay"
+  transactionId: varchar("transaction_id", { length: 255 }), // External payment ID
+
+  isAnonymous: boolean("is_anonymous").notNull().default(false),
+  isPublic: boolean("is_public").notNull().default(true), // Show in public list
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/**
+ * =========================
  * RELATIONS
  * =========================
  */
 export const usersRelations = relations(users, ({ many }) => ({
   diaries: many(diaries),
   writtenNotes: many(farewellNotes),
+  testimonials: many(testimonials),
+  donations: many(donations),
 }));
 
 export const diariesRelations = relations(diaries, ({ one, many }) => ({
@@ -144,6 +198,20 @@ export const farewellNotesRelations = relations(farewellNotes, ({ one }) => ({
   }),
 }));
 
+export const testimonialsRelations = relations(testimonials, ({ one }) => ({
+  user: one(users, {
+    fields: [testimonials.userId],
+    references: [users.id],
+  }),
+}));
+
+export const donationsRelations = relations(donations, ({ one }) => ({
+  user: one(users, {
+    fields: [donations.userId],
+    references: [users.id],
+  }),
+}));
+
 /**
  * =========================
  * TYPES
@@ -157,3 +225,9 @@ export type NewDiary = typeof diaries.$inferInsert;
 
 export type FarewellNote = typeof farewellNotes.$inferSelect;
 export type NewFarewellNote = typeof farewellNotes.$inferInsert;
+
+export type Testimonial = typeof testimonials.$inferSelect;
+export type NewTestimonial = typeof testimonials.$inferInsert;
+
+export type Donation = typeof donations.$inferSelect;
+export type NewDonation = typeof donations.$inferInsert;
