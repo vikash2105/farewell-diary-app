@@ -7,7 +7,6 @@ import passport from "passport";
 import morgan from "morgan";
 import "express-async-errors";
 
-// CommonJS-safe imports
 const connectPgSimple = require("connect-pg-simple");
 const { Pool } = require("pg");
 
@@ -25,12 +24,9 @@ const PgSession = connectPgSimple(session);
 export const createApp = (): Application => {
   const app = express();
 
-  // ✅ REQUIRED for Render / reverse proxy
+  // 🔥 REQUIRED for Render
   app.set("trust proxy", 1);
 
-  // ==============================
-  // SECURITY HEADERS
-  // ==============================
   app.use(
     helmet({
       contentSecurityPolicy: false,
@@ -38,47 +34,32 @@ export const createApp = (): Application => {
     })
   );
 
-  // ==============================
-  // CORS (AUTH-CRITICAL)
-  // ==============================
+  // 🔥 CORS MUST MATCH FRONTEND EXACTLY
   app.use(
     cors({
-      origin: env.FRONTEND_URL, // EXACT vercel URL
+      origin: env.FRONTEND_URL,
       credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
     })
   );
 
-  // ==============================
-  // BODY & PERFORMANCE
-  // ==============================
-  app.use(express.json({ limit: "10mb" }));
-  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.use(compression());
 
-  // ==============================
-  // LOGGING
-  // ==============================
   app.use(
     morgan("combined", {
       stream: {
-        write: (message: string) => logger.info(message.trim()),
+        write: (msg: string) => logger.info(msg.trim()),
       },
     })
   );
 
-  // ==============================
-  // POSTGRES SESSION STORE
-  // ==============================
   const pgPool = new Pool({
     connectionString: env.DATABASE_URL,
-    ssl:
-      env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
-        : false,
+    ssl: { rejectUnauthorized: false },
   });
 
+  // 🔥 SESSION FIX (THIS WAS YOUR BUG)
   app.use(
     session({
       name: "farewell.sid",
@@ -93,43 +74,27 @@ export const createApp = (): Application => {
       proxy: true,
       cookie: {
         httpOnly: true,
-        secure: true,        // 🔥 MUST be true on Render/Vercel
-        sameSite: "none",    // 🔥 REQUIRED for cross-domain cookies
+        secure: true,     // ✅ MUST BE TRUE
+        sameSite: "none", // ✅ MUST BE NONE
         maxAge: 7 * 24 * 60 * 60 * 1000,
       },
     })
   );
 
-  // ==============================
-  // GLOBAL RATE LIMIT
-  // ==============================
   app.use(generalLimiter);
 
-  // ==============================
-  // PASSPORT
-  // ==============================
   configurePassport();
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // ==============================
-  // ROUTES (ORDER MATTERS)
-  // ==============================
   app.use("/api/public", publicRoutes);
   app.use("/api/user", userRoutes);
   app.use(`/api/${env.API_VERSION}`, routes);
 
   app.get("/", (_req: Request, res: Response) => {
-    res.json({
-      success: true,
-      message: "Welcome to Farewell Diary API",
-      version: env.API_VERSION,
-    });
+    res.json({ success: true });
   });
 
-  // ==============================
-  // ERROR HANDLING
-  // ==============================
   app.use(notFoundHandler);
   app.use(errorHandler);
 
