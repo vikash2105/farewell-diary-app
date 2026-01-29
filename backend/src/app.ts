@@ -13,6 +13,8 @@ const { Pool } = require('pg');
 
 import { configurePassport } from './config/passport';
 import routes from './routes';
+import publicRoutes from './routes/publicRoutes';
+import userRoutes from './routes/userRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import { generalLimiter } from './middleware/rateLimit';
@@ -95,7 +97,7 @@ export const createApp = (): Application => {
   );
 
   // ==============================
-  // GLOBAL RATE LIMIT (AFTER SESSION)
+  // GLOBAL RATE LIMIT
   // ==============================
   app.use(generalLimiter);
 
@@ -107,8 +109,11 @@ export const createApp = (): Application => {
   app.use(passport.session());
 
   // ==============================
-  // ROUTES
+  // ROUTES (ORDER MATTERS)
   // ==============================
+  app.use('/api/public', publicRoutes);
+  app.use('/api/user', userRoutes);
+
   const API_VERSION = process.env.API_VERSION || 'v1';
   app.use(`/api/${API_VERSION}`, routes);
 

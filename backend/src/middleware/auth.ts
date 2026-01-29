@@ -1,13 +1,7 @@
-/**
- * Authentication Middleware
- * Verifies user is authenticated before accessing protected routes
- */
+// backend/src/middleware/auth.ts
 
 import { Request, Response, NextFunction } from 'express';
 
-/**
- * Extend Express Request type to include session data
- */
 declare global {
   namespace Express {
     interface Request {
@@ -18,16 +12,11 @@ declare global {
   }
 }
 
-/**
- * Require authentication middleware
- * Checks if user is logged in via session
- */
 export const requireAuth = (
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
-  // Check if user session exists
   if (!req.session || !req.session.userId) {
     res.status(401).json({
       error: 'Authentication required',
@@ -36,7 +25,6 @@ export const requireAuth = (
     return;
   }
 
-  // Attach user data to request for easy access
   req.userId = req.session.userId;
   req.userEmail = req.session.userEmail;
   req.userName = req.session.userName;
@@ -44,13 +32,9 @@ export const requireAuth = (
   next();
 };
 
-/**
- * Optional authentication middleware
- * Attaches user data if logged in, but doesn't require it
- */
 export const optionalAuth = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void => {
   if (req.session && req.session.userId) {

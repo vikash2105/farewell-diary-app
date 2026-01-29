@@ -1,7 +1,9 @@
+// backend/src/routes/authRoutes.ts
+
 import { Router, Request, Response } from 'express';
 import passport from 'passport';
 import { AuthController } from '../controllers/authController';
-import { isAuthenticated } from '../middleware/auth';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
@@ -33,7 +35,7 @@ router.get(
 /**
  * GET /api/v1/auth/me
  */
-router.get('/me', isAuthenticated, AuthController.getCurrentUser);
+router.get('/me', requireAuth, AuthController.getCurrentUser);
 
 /**
  * GET /api/v1/auth/status
@@ -43,6 +45,6 @@ router.get('/status', AuthController.checkAuth);
 /**
  * POST /api/v1/auth/logout
  */
-router.post('/logout', isAuthenticated, AuthController.logout);
+router.post('/logout', requireAuth, AuthController.logout);
 
 export default router;
