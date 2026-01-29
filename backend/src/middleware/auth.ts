@@ -1,6 +1,4 @@
-// backend/src/middleware/auth.ts
-
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 declare global {
   namespace Express {
@@ -12,6 +10,9 @@ declare global {
   }
 }
 
+/**
+ * Require authentication (session-based)
+ */
 export const requireAuth = (
   req: Request,
   res: Response,
@@ -19,28 +20,40 @@ export const requireAuth = (
 ): void => {
   if (!req.session || !req.session.userId) {
     res.status(401).json({
-      error: 'Authentication required',
-      message: 'Please log in to access this resource',
+      success: false,
+      error: "Authentication required",
+      message: "Please log in to access this resource",
     });
     return;
   }
 
-  req.userId = req.session.userId;
-  req.userEmail = req.session.userEmail;
-  req.userName = req.session.userName;
+  req.userId = String(req.session.userId);
+  req.userEmail = req.session.userEmail
+    ? String(req.session.userEmail)
+    : undefined;
+  req.userName = req.session.userName
+    ? String(req.session.userName)
+    : undefined;
 
   next();
 };
 
+/**
+ * Optional authentication
+ */
 export const optionalAuth = (
   req: Request,
   _res: Response,
   next: NextFunction
 ): void => {
-  if (req.session && req.session.userId) {
-    req.userId = req.session.userId;
-    req.userEmail = req.session.userEmail;
-    req.userName = req.session.userName;
+  if (req.session?.userId) {
+    req.userId = String(req.session.userId);
+    req.userEmail = req.session.userEmail
+      ? String(req.session.userEmail)
+      : undefined;
+    req.userName = req.session.userName
+      ? String(req.session.userName)
+      : undefined;
   }
 
   next();

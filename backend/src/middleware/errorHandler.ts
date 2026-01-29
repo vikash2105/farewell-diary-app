@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
-import { logger } from '../utils/logger';
+import { Request, Response, NextFunction } from "express";
+import { ZodError } from "zod";
+import { logger } from "../utils/logger";
 
 /**
- * Custom API Error class
+ * Custom API Error
  */
 export class ApiError extends Error {
   statusCode: number;
@@ -17,9 +17,6 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Error response interface
- */
 interface ErrorResponse {
   success: false;
   error: string;
@@ -28,7 +25,7 @@ interface ErrorResponse {
 }
 
 /**
- * Global error handler middleware
+ * Global error handler
  */
 export const errorHandler = (
   err: Error | ApiError | ZodError,
@@ -37,25 +34,25 @@ export const errorHandler = (
   _next: NextFunction
 ): void => {
   let statusCode = 500;
-  let message = 'Internal server error';
-  let details: any = undefined;
+  let message = "Internal server error";
+  let details: any;
 
   if (err instanceof ZodError) {
     statusCode = 400;
-    message = 'Validation error';
+    message = "Validation error";
     details = err.errors.map((e) => ({
-      field: e.path.join('.'),
+      field: e.path.join("."),
       message: e.message,
     }));
   } else if (err instanceof ApiError) {
     statusCode = err.statusCode;
     message = err.message;
-  } else if (err.name === 'UnauthorizedError') {
+  } else if (err.name === "UnauthorizedError") {
     statusCode = 401;
-    message = 'Unauthorized';
+    message = "Unauthorized";
   }
 
-  logger.error('Error occurred', {
+  logger.error("Request failed", {
     statusCode,
     message: err.message,
     stack: err.stack,
@@ -67,7 +64,7 @@ export const errorHandler = (
     details,
   };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     response.stack = err.stack;
   }
 
@@ -80,6 +77,6 @@ export const errorHandler = (
 export const notFoundHandler = (_req: Request, res: Response): void => {
   res.status(404).json({
     success: false,
-    error: 'Route not found',
+    error: "Route not found",
   });
 };
