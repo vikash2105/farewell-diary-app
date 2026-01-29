@@ -6,7 +6,6 @@ import { authApi } from './api/client';
 import { useAuthStore } from './stores/authStore';
 
 // Pages
-import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import PublicDiary from './pages/PublicDiary';
 import WriteFarewellNote from './pages/WriteFarewellNote';
@@ -65,6 +64,7 @@ function App() {
           />
 
           <Route path="/diary/:link" element={<PublicDiary />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/diary/:link/write" element={<WriteFarewellNote />} />
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
