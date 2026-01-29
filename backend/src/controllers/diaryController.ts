@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { DiaryService } from "../services/diaryService";
 import { FarewellNoteService } from "../services/farewellNoteService";
-import { logger } from "../utils/logger";
 import { ApiError } from "../middleware/errorHandler";
 
 export class DiaryController {

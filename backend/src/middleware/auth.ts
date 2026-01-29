@@ -18,7 +18,7 @@ export const requireAuth = (
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.session || !req.session.userId) {
+  if (!req.session?.userId) {
     res.status(401).json({
       success: false,
       error: "Authentication required",
@@ -58,3 +58,9 @@ export const optionalAuth = (
 
   next();
 };
+
+/**
+ * ✅ BACKWARD-COMPATIBLE ALIAS
+ * Some routes still import `isAuthenticated`
+ */
+export const isAuthenticated = requireAuth;
