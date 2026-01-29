@@ -20,13 +20,18 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
 
-  // ✅ MUST be nullable for OAuth
+  // ✅ NEW: optional public username
+  username: varchar("username", { length: 50 }).unique(),
+
+  // ✅ NEW: optional bio
+  bio: text("bio"),
+
+  // OAuth fields
   googleId: varchar("google_id", { length: 255 }).unique(),
   profilePicture: text("profile_picture"),
 
   isActive: boolean("is_active").notNull().default(true),
 
-  // ✅ Supabase expects timestamptz
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -79,7 +84,6 @@ export const farewellNotes = pgTable("farewell_notes", {
     .notNull()
     .references(() => diaries.id, { onDelete: "cascade" }),
 
-  // nullable for anonymous notes
   authorId: uuid("author_id").references(() => users.id, {
     onDelete: "set null",
   }),
@@ -106,7 +110,7 @@ export const farewellNotes = pgTable("farewell_notes", {
 
 /**
  * =========================
- * SESSIONS TABLE (Render)
+ * SESSIONS TABLE
  * =========================
  */
 export const sessions = pgTable("sessions", {
@@ -117,20 +121,19 @@ export const sessions = pgTable("sessions", {
 
 /**
  * =========================
- * TESTIMONIALS TABLE (NEW)
+ * TESTIMONIALS TABLE
  * =========================
  */
 export const testimonials = pgTable("testimonials", {
   id: uuid("id").defaultRandom().primaryKey(),
 
-  // Optional - can be null for anonymous testimonials
   userId: uuid("user_id").references(() => users.id, {
     onDelete: "set null",
   }),
 
   name: varchar("name", { length: 255 }).notNull(),
   message: text("message").notNull(),
-  isApproved: boolean("is_approved").notNull().default(false), // Admin moderation
+  isApproved: boolean("is_approved").notNull().default(false),
 
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -139,28 +142,25 @@ export const testimonials = pgTable("testimonials", {
 
 /**
  * =========================
- * DONATIONS TABLE (NEW)
+ * DONATIONS TABLE
  * =========================
  */
 export const donations = pgTable("donations", {
   id: uuid("id").defaultRandom().primaryKey(),
 
-  // Optional - can be null for anonymous donations
   userId: uuid("user_id").references(() => users.id, {
     onDelete: "set null",
   }),
 
-  // Display information (sanitized)
   displayName: varchar("display_name", { length: 255 }).notNull(),
-  amount: varchar("amount", { length: 50 }).notNull(), // e.g., "$10", "₹500"
-  message: text("message"), // Optional message
+  amount: varchar("amount", { length: 50 }).notNull(),
+  message: text("message"),
 
-  // Internal tracking (NOT exposed publicly)
-  paymentProvider: varchar("payment_provider", { length: 50 }), // "stripe", "razorpay"
-  transactionId: varchar("transaction_id", { length: 255 }), // External payment ID
+  paymentProvider: varchar("payment_provider", { length: 50 }),
+  transactionId: varchar("transaction_id", { length: 255 }),
 
   isAnonymous: boolean("is_anonymous").notNull().default(false),
-  isPublic: boolean("is_public").notNull().default(true), // Show in public list
+  isPublic: boolean("is_public").notNull().default(true),
 
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -219,15 +219,3 @@ export const donationsRelations = relations(donations, ({ one }) => ({
  */
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-
-export type Diary = typeof diaries.$inferSelect;
-export type NewDiary = typeof diaries.$inferInsert;
-
-export type FarewellNote = typeof farewellNotes.$inferSelect;
-export type NewFarewellNote = typeof farewellNotes.$inferInsert;
-
-export type Testimonial = typeof testimonials.$inferSelect;
-export type NewTestimonial = typeof testimonials.$inferInsert;
-
-export type Donation = typeof donations.$inferSelect;
-export type NewDonation = typeof donations.$inferInsert;

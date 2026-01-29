@@ -3,11 +3,11 @@
  * Handles user profile management
  */
 
-import { Request, Response } from 'express';
-import { db } from '../db';
-import { users } from '../db/schema';
-import { eq, and, ne } from 'drizzle-orm';
-import { sanitizeText, sanitizeUsername } from '../utils/sanitize';
+import { Request, Response } from "express";
+import { db } from "../db";
+import { users } from "../db/schema";
+import { eq, and, ne } from "drizzle-orm";
+import { sanitizeText, sanitizeUsername } from "../utils/sanitize";
 
 /**
  * GET /api/user/profile
@@ -21,7 +21,7 @@ export const getProfile = async (
     const userId = req.userId;
 
     if (!userId) {
-      res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ error: "Authentication required" });
       return;
     }
 
@@ -40,7 +40,7 @@ export const getProfile = async (
       .limit(1);
 
     if (!result.length) {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: "User not found" });
       return;
     }
 
@@ -49,8 +49,8 @@ export const getProfile = async (
       data: result[0],
     });
   } catch (error) {
-    console.error('❌ getProfile error:', error);
-    res.status(500).json({ error: 'Failed to fetch profile' });
+    console.error("❌ getProfile error:", error);
+    res.status(500).json({ error: "Failed to fetch profile" });
   }
 };
 
@@ -67,27 +67,28 @@ export const updateProfile = async (
     const { name, username, bio } = req.body;
 
     if (!userId) {
-      res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ error: "Authentication required" });
       return;
     }
 
     // ==============================
     // Validate & sanitize name
     // ==============================
-    if (!name || typeof name !== 'string' || name.length < 2 || name.length > 255) {
+    if (
+      !name ||
+      typeof name !== "string" ||
+      name.length < 2 ||
+      name.length > 255
+    ) {
       res.status(400).json({
-        error: 'Invalid name',
-        message: 'Name must be between 2 and 255 characters',
+        error: "Invalid name",
+        message: "Name must be between 2 and 255 characters",
       });
       return;
     }
 
-    const updateData: {
-      name: string;
-      username?: string | null;
-      bio?: string | null;
-      updatedAt: Date;
-    } = {
+    // ✅ CORRECT TYPE FOR DRIZZLE UPDATE
+    const updateData: Partial<typeof users.$inferInsert> = {
       name: sanitizeText(name, 255),
       updatedAt: new Date(),
     };
@@ -96,7 +97,7 @@ export const updateProfile = async (
     // Username handling
     // ==============================
     if (username !== undefined) {
-      if (username === null || username.trim() === '') {
+      if (username === null || username.trim() === "") {
         updateData.username = null;
       } else {
         try {
@@ -115,8 +116,8 @@ export const updateProfile = async (
 
           if (existing.length > 0) {
             res.status(400).json({
-              error: 'Username taken',
-              message: 'This username is already in use',
+              error: "Username taken",
+              message: "This username is already in use",
             });
             return;
           }
@@ -124,7 +125,7 @@ export const updateProfile = async (
           updateData.username = sanitizedUsername;
         } catch (err: any) {
           res.status(400).json({
-            error: 'Invalid username',
+            error: "Invalid username",
             message: err.message,
           });
           return;
@@ -136,12 +137,12 @@ export const updateProfile = async (
     // Bio handling
     // ==============================
     if (bio !== undefined) {
-      if (bio === null || bio.trim() === '') {
+      if (bio === null || bio.trim() === "") {
         updateData.bio = null;
-      } else if (bio.length > 500) {
+      } else if (typeof bio !== "string" || bio.length > 500) {
         res.status(400).json({
-          error: 'Bio too long',
-          message: 'Bio must be less than 500 characters',
+          error: "Bio too long",
+          message: "Bio must be less than 500 characters",
         });
         return;
       } else {
@@ -149,18 +150,15 @@ export const updateProfile = async (
       }
     }
 
-    await db
-      .update(users)
-      .set(updateData)
-      .where(eq(users.id, userId));
+    await db.update(users).set(updateData).where(eq(users.id, userId));
 
     res.json({
       success: true,
-      message: 'Profile updated successfully',
+      message: "Profile updated successfully",
     });
   } catch (error) {
-    console.error('❌ updateProfile error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    console.error("❌ updateProfile error:", error);
+    res.status(500).json({ error: "Failed to update profile" });
   }
 };
 
@@ -177,31 +175,36 @@ export const uploadAvatar = async (
     const file = req.file;
 
     if (!userId) {
-      res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ error: "Authentication required" });
       return;
     }
 
     if (!file) {
       res.status(400).json({
-        error: 'No file uploaded',
-        message: 'Please select an image to upload',
+        error: "No file uploaded",
+        message: "Please select an image to upload",
       });
       return;
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
     if (!allowedTypes.includes(file.mimetype)) {
       res.status(400).json({
-        error: 'Invalid file type',
-        message: 'Only JPEG, PNG, WebP, and GIF images are allowed',
+        error: "Invalid file type",
+        message: "Only JPEG, PNG, WebP, and GIF images are allowed",
       });
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
       res.status(400).json({
-        error: 'File too large',
-        message: 'Image must be less than 2MB',
+        error: "File too large",
+        message: "Image must be less than 2MB",
       });
       return;
     }
@@ -220,11 +223,11 @@ export const uploadAvatar = async (
     res.json({
       success: true,
       avatarUrl,
-      message: 'Avatar uploaded successfully',
+      message: "Avatar uploaded successfully",
     });
   } catch (error) {
-    console.error('❌ uploadAvatar error:', error);
-    res.status(500).json({ error: 'Failed to upload avatar' });
+    console.error("❌ uploadAvatar error:", error);
+    res.status(500).json({ error: "Failed to upload avatar" });
   }
 };
 
@@ -240,7 +243,7 @@ export const removeAvatar = async (
     const userId = req.userId;
 
     if (!userId) {
-      res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ error: "Authentication required" });
       return;
     }
 
@@ -254,10 +257,10 @@ export const removeAvatar = async (
 
     res.json({
       success: true,
-      message: 'Avatar removed successfully',
+      message: "Avatar removed successfully",
     });
   } catch (error) {
-    console.error('❌ removeAvatar error:', error);
-    res.status(500).json({ error: 'Failed to remove avatar' });
+    console.error("❌ removeAvatar error:", error);
+    res.status(500).json({ error: "Failed to remove avatar" });
   }
 };
