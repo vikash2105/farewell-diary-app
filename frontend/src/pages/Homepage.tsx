@@ -3,7 +3,7 @@ import { Heart } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { authApi } from '../api/client';
 
-// Components
+// Sections
 import HeroSection from '../components/homepage/HeroSection';
 import FeaturesSection from '../components/homepage/FeaturesSection';
 import TestimonialsSection from '../components/homepage/TestimonialsSection';
@@ -14,12 +14,16 @@ export default function Homepage() {
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleAuth = () => {
+  const handleGetStarted = () => {
     if (isAuthenticated) {
       navigate('/dashboard');
     } else {
       authApi.loginWithGoogle();
     }
+  };
+
+  const scrollToBottom = () => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
 
   return (
@@ -29,21 +33,24 @@ export default function Homepage() {
         <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Heart className="w-8 h-8 text-primary-600" fill="currentColor" />
-            <span className="text-2xl font-bold text-primary-600">Farewell Diary</span>
+            <span className="text-2xl font-bold text-primary-600">
+              Farewell Diary
+            </span>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <button
-              onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+              onClick={scrollToBottom}
               className="hidden md:block text-secondary-600 hover:text-primary-600 transition-colors"
             >
               Support Us
             </button>
+
             <button
-              onClick={handleAuth}
+              onClick={handleGetStarted}
               className="btn btn-primary"
             >
-              {isAuthenticated ? 'Dashboard' : 'Get Started'}
+              {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
             </button>
           </div>
         </nav>
@@ -69,49 +76,58 @@ export default function Homepage() {
                 A private, secure place to preserve the farewell messages that matter most.
               </p>
             </div>
-            
+
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-secondary-400">
                 <li>
-                  <button onClick={handleAuth} className="hover:text-white transition-colors">
+                  <button
+                    onClick={handleGetStarted}
+                    className="hover:text-white transition-colors"
+                  >
                     Create Diary
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => {}} className="hover:text-white transition-colors">
+                  <button className="hover:text-white transition-colors">
                     How It Works
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => {}} className="hover:text-white transition-colors">
+                  <button className="hover:text-white transition-colors">
                     Privacy & Security
                   </button>
                 </li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-secondary-400">
                 <li>
-                  <button onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} className="hover:text-white transition-colors">
+                  <button
+                    onClick={scrollToBottom}
+                    className="hover:text-white transition-colors"
+                  >
                     Donate
                   </button>
                 </li>
                 <li>
-                  <a href="mailto:support@farewelldiary.com" className="hover:text-white transition-colors">
+                  <a
+                    href="mailto:support@farewelldiary.com"
+                    className="hover:text-white transition-colors"
+                  >
                     Contact
                   </a>
                 </li>
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-secondary-700 pt-8 text-center text-secondary-400">
             <p>&copy; 2026 Farewell Diary. Made with ❤️ for preserving precious memories.</p>
             <p className="text-sm mt-2">
-              Independently built and maintained. No venture capital, no ads, just a passion project.
+              Independently built and maintained. No ads, no tracking, just care.
             </p>
           </div>
         </div>
