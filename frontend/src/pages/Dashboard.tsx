@@ -82,7 +82,7 @@ export default function Dashboard() {
           </div>
 
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/Profile')}
             className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors"
           >
             <User className="w-5 h-5" />
