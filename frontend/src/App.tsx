@@ -12,6 +12,7 @@ import WriteFarewellNote from './pages/WriteFarewellNote';
 import NotFound from './pages/NotFound';
 import Homepage from './pages/Homepage';
 import Profile from './pages/Profile';
+import CreateDiary from './pages/CreateDiary';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -63,8 +64,26 @@ function App() {
             }
           />
 
+          <Route
+            path="/create"
+            element={
+              <ProtectedRoute>
+                <CreateDiary />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="/diary/:link" element={<PublicDiary />} />
-          <Route path="/profile" element={<Profile />} />
+          
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          
           <Route path="/diary/:link/write" element={<WriteFarewellNote />} />
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />

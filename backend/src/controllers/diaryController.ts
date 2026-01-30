@@ -46,13 +46,45 @@ export class DiaryController {
     });
   }
 
+  static async getUserDiaries(req: Request, res: Response): Promise<void> {
+    if (!req.user) throw new ApiError(401, "Authentication required");
+
+    // For now, user can only have one diary
+    // This endpoint returns it in array format for dashboard compatibility
+    const diary = await DiaryService.findByUserId(req.user.id);
+    
+    if (!diary) {
+      res.json({ success: true, data: [] });
+      return;
+    }
+
+    const noteCount = await FarewellNoteService.countByDiaryId(diary.id);
+
+    res.json({
+      success: true,
+      data: [{
+        id: diary.id,
+        title: diary.title,
+        description: diary.description,
+        contributorCount: noteCount, // Using note count as contributor count
+        totalNotes: noteCount,
+        updatedAt: diary.updatedAt,
+        uniqueLink: diary.uniqueLink,
+      }],
+    });
+  }
+
   static async getDiaryByLinkForPublic(req: Request, res: Response): Promise<void> {
     const diary = await DiaryService.validateAccess(req.params.link);
 
-    // 🔐 DO NOT expose diary content
+    // ✅ Return minimal data for public contributors
+    // Contributors need title/description to write meaningful notes
+    // But we DON'T return: id, uniqueLink, userId, settings
     res.json({
       success: true,
       data: {
+        title: diary.title,
+        description: diary.description,
         isActive: diary.isActive,
       },
     });

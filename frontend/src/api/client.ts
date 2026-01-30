@@ -71,6 +71,12 @@ export const diaryApi = {
     >('/diary/me'),
 
   /**
+   * Get all user's diaries (for dashboard)
+   */
+  getUserDiaries: () =>
+    apiClient.get<ApiResponse<Diary[]>>('/diaries'),
+
+  /**
    * Get public diary by link (write-only view)
    */
   getByLink: (link: string) =>

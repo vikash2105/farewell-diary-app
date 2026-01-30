@@ -9,10 +9,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, User } from 'lucide-react';
+import { Heart, User, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import DiaryGrid from '../components/dashboard/DiaryGrid';
 import DiaryFilters from '../components/dashboard/DiaryFilters';
 import FloatingActionButton from '../components/dashboard/FloatingActionButton';
+import { apiClient } from '../api/client';
 
 // Update this import to match your actual API client location
 // import { diaryApi } from '../api/diaryApi';
@@ -39,18 +41,12 @@ export default function Dashboard() {
 
   const loadDiaries = async () => {
     try {
-      // Replace with your actual API call
-      // const response = await diaryApi.getUserDiaries();
-      // setDiaries(response.data);
-      
-      // Temporary: Fetch from your existing endpoint
-      const response = await fetch('/api/diaries', {
-        credentials: 'include',
-      });
-      const data = await response.json();
-      setDiaries(data.data || []);
+      const response = await apiClient.get('/diaries');
+      setDiaries(response.data.data || []);
     } catch (error) {
       console.error('Failed to load diaries:', error);
+      toast.error('Failed to load diaries');
+      setDiaries([]);
     } finally {
       setLoading(false);
     }
@@ -125,8 +121,34 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* No Diary State */}
+        {!loading && diaries.length === 0 && (
+          <div className="text-center py-16">
+            <div className="bg-white rounded-3xl shadow-xl p-12 max-w-2xl mx-auto">
+              <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Heart className="w-12 h-12 text-primary-600" fill="currentColor" />
+              </div>
+              <h2 className="text-2xl font-bold text-secondary-900 mb-3">
+                Create Your First Diary
+              </h2>
+              <p className="text-secondary-600 mb-8">
+                Start collecting heartfelt farewell messages from your loved ones
+              </p>
+              <button
+                onClick={() => navigate('/create')}
+                className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-xl inline-flex items-center gap-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
+              >
+                <Plus className="w-5 h-5" />
+                Create Diary
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Diary Grid */}
-        <DiaryGrid diaries={filteredDiaries} loading={loading} />
+        {diaries.length > 0 && (
+          <DiaryGrid diaries={filteredDiaries} loading={loading} />
+        )}
 
         {/* Floating Action Button */}
         <FloatingActionButton />

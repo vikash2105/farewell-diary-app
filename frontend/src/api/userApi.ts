@@ -3,7 +3,7 @@
  * Handles user profile management
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1';
 
 export interface UserProfile {
   id: string;
@@ -20,7 +20,7 @@ export interface UserProfile {
  */
 export const getProfile = async (): Promise<UserProfile | null> => {
   try {
-    const response = await fetch(`${API_URL}/api/user/profile`, {
+    const response = await fetch(`${API_URL}/user/profile`, {
       credentials: 'include', // Include session cookie
     });
     
@@ -45,7 +45,7 @@ export const updateProfile = async (profile: {
   bio?: string;
 }): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await fetch(`${API_URL}/api/user/profile`, {
+    const response = await fetch(`${API_URL}/user/profile`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export const uploadAvatar = async (
     const formData = new FormData();
     formData.append('avatar', file);
     
-    const response = await fetch(`${API_URL}/api/user/avatar`, {
+    const response = await fetch(`${API_URL}/user/avatar`, {
       method: 'POST',
       body: formData,
       credentials: 'include',
@@ -115,7 +115,7 @@ export const removeAvatar = async (): Promise<{
   message: string;
 }> => {
   try {
-    const response = await fetch(`${API_URL}/api/user/avatar`, {
+    const response = await fetch(`${API_URL}/user/avatar`, {
       method: 'DELETE',
       credentials: 'include',
     });

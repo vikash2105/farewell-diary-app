@@ -33,6 +33,13 @@ router.post(
 router.get('/me', isAuthenticated, DiaryController.getMyDiary);
 
 /**
+ * @route   GET /api/v1/diaries
+ * @desc    Get all diaries for current user (for dashboard)
+ * @access  Private
+ */
+router.get('/', isAuthenticated, DiaryController.getUserDiaries);
+
+/**
  * @route   GET /api/v1/diary/me/notes
  * @desc    Get all notes for current user's diary
  * @access  Private
