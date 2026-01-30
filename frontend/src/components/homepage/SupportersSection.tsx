@@ -18,20 +18,21 @@ export default function SupportersSection() {
     fetchDonations();
   }, []);
 
-  const fetchDonations = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/public/donations`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setDonations(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching donations:', error);
-    } finally {
-      setIsLoading(false);
+const fetchDonations = async () => {
+  try {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const response = await fetch(`${API_BASE_URL}/api/public/donations`);
+    const data = await response.json();
+    
+    if (data.success) {
+      setDonations(data.data);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching donations:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   if (isLoading) {
     return null;

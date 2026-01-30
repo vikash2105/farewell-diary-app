@@ -41,7 +41,7 @@ export default function Dashboard() {
 
   const loadDiaries = async () => {
     try {
-      const response = await apiClient.get('/diaries');
+      const response = await apiClient.get('/diary');
       setDiaries(response.data.data || []);
     } catch (error) {
       console.error('Failed to load diaries:', error);

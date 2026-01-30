@@ -20,15 +20,21 @@ export default function Profile() {
   }, []);
 
   const loadProfile = async () => {
-    try {
-      const data = await userApi.getProfile();
+  try {
+    const data = await userApi.getProfile();
+    if (!data) {
+      console.error('Profile data is null');
+      setProfile(null);
+    } else {
       setProfile(data);
-    } catch (error) {
-      console.error('Failed to load profile:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error('Failed to load profile:', error);
+    setProfile(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleAvatarUpload = async (file: File) => {
     const result = await userApi.uploadAvatar(file);
