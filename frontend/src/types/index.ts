@@ -18,6 +18,16 @@ export interface Diary {
   updatedAt: string;
 }
 
+export interface DashboardDiary {
+  id: string;
+  title: string;
+  description: string | null;
+  contributorCount: number;
+  totalNotes: number;
+  updatedAt: string;
+  uniqueLink: string;
+}
+
 export interface DiarySettings {
   allowAnonymous?: boolean;
   requireApproval?: boolean;

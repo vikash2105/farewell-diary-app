@@ -15,20 +15,11 @@ import DiaryGrid from '../components/dashboard/DiaryGrid';
 import DiaryFilters from '../components/dashboard/DiaryFilters';
 import FloatingActionButton from '../components/dashboard/FloatingActionButton';
 import { diaryApi } from '../api/client';
-
-interface Diary {
-  id: string;
-  title: string;
-  description: string | null;
-  contributorCount: number;
-  totalNotes: number;
-  updatedAt: string;
-  uniqueLink: string;
-}
+import type { DashboardDiary } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [diaries, setDiaries] = useState<Diary[]>([]);
+  const [diaries, setDiaries] = useState<DashboardDiary[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'shared' | 'private'>('all');
 

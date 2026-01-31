@@ -38,29 +38,29 @@ export default function Profile() {
 };
 
   const handleAvatarUpload = async (file: File) => {
-    const result = await userApi.uploadAvatar(file);
-    if (result.success && result.avatarUrl) {
-      setProfile({ ...profile, profilePicture: result.avatarUrl });
+    const response = await userApi.uploadAvatar(file);
+    if (response.data.success && response.data.data?.avatarUrl) {
+      setProfile({ ...profile, profilePicture: response.data.data.avatarUrl });
     } else {
-      throw new Error(result.message);
+      throw new Error(response.data.message || 'Failed to upload avatar');
     }
   };
 
   const handleAvatarRemove = async () => {
-    const result = await userApi.removeAvatar();
-    if (result.success) {
+    const response = await userApi.removeAvatar();
+    if (response.data.success) {
       setProfile({ ...profile, profilePicture: null });
     } else {
-      throw new Error(result.message);
+      throw new Error(response.data.message || 'Failed to remove avatar');
     }
   };
 
   const handleProfileSave = async (data: any) => {
-    const result = await userApi.updateProfile(data);
-    if (result.success) {
+    const response = await userApi.updateProfile(data);
+    if (response.data.success) {
       setProfile({ ...profile, ...data });
     } else {
-      throw new Error(result.message);
+      throw new Error(response.data.message || 'Failed to update profile');
     }
   };
 

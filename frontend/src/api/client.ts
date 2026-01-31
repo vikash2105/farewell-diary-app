@@ -115,7 +115,15 @@ export const diaryApi = {
    * GET /api/v1/diary
    */
   getUserDiaries: () =>
-    apiClient.get<ApiResponse<Diary[]>>('/diary'),
+    apiClient.get<ApiResponse<Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      contributorCount: number;
+      totalNotes: number;
+      updatedAt: string;
+      uniqueLink: string;
+    }>>>('/diary'),
 
   /**
    * Get public diary by link (write-only view)
