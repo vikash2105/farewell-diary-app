@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import AvatarUpload from '../components/profile/AvatarUpload';
 import ProfileForm from '../components/profile/ProfileForm';
-import { userApi } from '../api/userApi';
+import { userApi } from '../api';
 
 export default function Profile() {
   const navigate = useNavigate();
