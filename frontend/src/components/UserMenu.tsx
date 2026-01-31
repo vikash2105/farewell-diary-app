@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
-import { authApi } from '../api/client';
+import { authApi } from '../api/authApi';
 import { useAuthStore } from '../stores/authStore';
 
 export default function UserMenu() {
