@@ -1,8 +1,3 @@
-/**
- * FloatingActionButton Component
- * Floating "+" button to create new diary
- */
-
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,45 +6,10 @@ export default function FloatingActionButton() {
 
   return (
     <button
-      onClick={() => navigate('/create')}
-      className="
-        fixed bottom-8 right-8
-        w-16 h-16
-        bg-primary-600 hover:bg-primary-700
-        text-white
-        rounded-full
-        shadow-2xl
-        flex items-center justify-center
-        transition-all duration-300
-        hover:scale-110 hover:rotate-90
-        active:scale-95
-        z-50
-        group
-      "
-      aria-label="Create new diary"
+      onClick={() => navigate('/diaries/new')}
+      className="fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-full bg-gray-900 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
     >
-      <Plus className="w-8 h-8" />
-      
-      {/* Tooltip */}
-      <div className="
-        absolute bottom-full right-0 mb-2
-        bg-secondary-900 text-white text-sm
-        px-3 py-2 rounded-lg
-        whitespace-nowrap
-        opacity-0 group-hover:opacity-100
-        pointer-events-none
-        transition-opacity duration-200
-      ">
-        Create New Diary
-      </div>
-      
-      {/* Ripple effect on hover */}
-      <div className="
-        absolute inset-0 rounded-full
-        bg-primary-400 opacity-0
-        group-hover:opacity-20
-        animate-ping
-      " />
+      <Plus size={24} />
     </button>
   );
 }
