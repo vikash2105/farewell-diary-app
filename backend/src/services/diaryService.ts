@@ -37,6 +37,28 @@ export class DiaryService {
     }
   }
 
+  /**
+   * Find all diaries by user ID (supports up to 4 diaries per user)
+   */
+  static async findAllByUserId(userId: string) {
+    try {
+      const userDiaries = await db
+        .select()
+        .from(diaries)
+        .where(eq(diaries.userId, userId))
+        .orderBy(diaries.createdAt);
+
+      return userDiaries;
+    } catch (error) {
+      logger.error("Error finding diaries by user ID", error);
+      throw new ApiError(500, "Error retrieving diaries");
+    }
+  }
+
+  /**
+   * Find single diary by user ID (legacy - for backwards compatibility)
+   * Returns the FIRST diary if multiple exist
+   */
   static async findByUserId(userId: string) {
     try {
       const [diary] = await db
@@ -52,15 +74,29 @@ export class DiaryService {
     }
   }
 
+  /**
+   * Count diaries for a user
+   */
+  static async countByUserId(userId: string): Promise<number> {
+    try {
+      const userDiaries = await this.findAllByUserId(userId);
+      return userDiaries.length;
+    } catch (error) {
+      logger.error("Error counting diaries", error);
+      throw new ApiError(500, "Error counting diaries");
+    }
+  }
+
   static async create(
     userId: string,
     title: string,
     description?: string,
     settings: Record<string, any> = {}
   ) {
-    const existing = await this.findByUserId(userId);
-    if (existing) {
-      throw new ApiError(400, "User already has a diary");
+    // ✅ NEW BUSINESS RULE: Users can create up to 4 diaries
+    const existingCount = await this.countByUserId(userId);
+    if (existingCount >= 4) {
+      throw new ApiError(400, "Maximum diary limit reached. You can create up to 4 diaries.");
     }
 
     let uniqueLink = "";
@@ -87,7 +123,7 @@ export class DiaryService {
         })
         .returning();
 
-      logger.info("Diary created", { diaryId: diary.id, userId });
+      logger.info("Diary created", { diaryId: diary.id, userId, totalDiaries: existingCount + 1 });
       return diary;
     } catch (error) {
       logger.error("Error creating diary", error);

@@ -49,28 +49,34 @@ export class DiaryController {
   static async getUserDiaries(req: Request, res: Response): Promise<void> {
     if (!req.user) throw new ApiError(401, "Authentication required");
 
-    // For now, user can only have one diary
-    // This endpoint returns it in array format for dashboard compatibility
-    const diary = await DiaryService.findByUserId(req.user.id);
+    // ✅ FIXED: Return ALL user diaries (up to 4)
+    const userDiaries = await DiaryService.findAllByUserId(req.user.id);
     
-    if (!diary) {
+    if (userDiaries.length === 0) {
       res.json({ success: true, data: [] });
       return;
     }
 
-    const noteCount = await FarewellNoteService.countByDiaryId(diary.id);
+    // Get note counts for all diaries
+    const diariesWithCounts = await Promise.all(
+      userDiaries.map(async (diary) => {
+        const noteCount = await FarewellNoteService.countByDiaryId(diary.id);
+        return {
+          id: diary.id,
+          title: diary.title,
+          description: diary.description,
+          contributorCount: noteCount,
+          totalNotes: noteCount,
+          updatedAt: diary.updatedAt,
+          uniqueLink: diary.uniqueLink,
+          isActive: diary.isActive,
+        };
+      })
+    );
 
     res.json({
       success: true,
-      data: [{
-        id: diary.id,
-        title: diary.title,
-        description: diary.description,
-        contributorCount: noteCount, // Using note count as contributor count
-        totalNotes: noteCount,
-        updatedAt: diary.updatedAt,
-        uniqueLink: diary.uniqueLink,
-      }],
+      data: diariesWithCounts,
     });
   }
 

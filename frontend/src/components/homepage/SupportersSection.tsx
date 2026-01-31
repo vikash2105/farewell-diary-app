@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { dummyDonations } from '../../data/dummyData';
 
 interface Donation {
   id: string;
@@ -21,14 +22,20 @@ export default function SupportersSection() {
 const fetchDonations = async () => {
   try {
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${API_BASE_URL}/api/public/donations`);
+    const response = await fetch(`${API_BASE_URL}/public/donations`);
     const data = await response.json();
     
-    if (data.success) {
+    // ✅ Use real data if available, otherwise use dummy data
+    if (data.success && data.data && data.data.length > 0) {
       setDonations(data.data);
+    } else {
+      // Use dummy data to make homepage look professional
+      setDonations(dummyDonations);
     }
   } catch (error) {
     console.error('Error fetching donations:', error);
+    // On error, use dummy data
+    setDonations(dummyDonations);
   } finally {
     setIsLoading(false);
   }

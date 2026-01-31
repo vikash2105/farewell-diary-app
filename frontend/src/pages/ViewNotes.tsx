@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ArrowLeft, Trash2, User } from 'lucide-react';
+import { Heart, ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { diaryApi, notesApi } from '../api/client';
+import UserMenu from '../components/UserMenu';
 import type { FarewellNote } from '../types';
 import { format } from 'date-fns';
 
@@ -81,8 +82,7 @@ export default function ViewNotes() {
             onClick={() => navigate('/profile')}
             className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors"
           >
-            <User className="w-5 h-5" />
-            <span className="hidden md:inline">Profile</span>
+            <UserMenu />
           </button>
         </nav>
       </header>

@@ -26,6 +26,7 @@ export interface DashboardDiary {
   totalNotes: number;
   updatedAt: string;
   uniqueLink: string;
+  isActive: boolean;
 }
 
 export interface DiarySettings {

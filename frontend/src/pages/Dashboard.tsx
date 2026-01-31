@@ -9,11 +9,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, User, Plus } from 'lucide-react';
+import { Heart, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import DiaryGrid from '../components/dashboard/DiaryGrid';
 import DiaryFilters from '../components/dashboard/DiaryFilters';
 import FloatingActionButton from '../components/dashboard/FloatingActionButton';
+import UserMenu from '../components/UserMenu';
 import { diaryApi } from '../api/client';
 import type { DashboardDiary } from '../types';
 
@@ -69,13 +70,7 @@ export default function Dashboard() {
             <span className="text-2xl font-bold text-primary-600">Farewell Diary</span>
           </div>
 
-          <button
-            onClick={() => navigate('/profile')}
-            className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors"
-          >
-            <User className="w-5 h-5" />
-            <span className="hidden md:inline">Profile</span>
-          </button>
+          <UserMenu />
         </nav>
       </header>
 
@@ -86,15 +81,19 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold text-secondary-900 mb-2">
-                My Collection
+                My Diaries
                 {diaries.length > 0 && (
                   <span className="ml-3 text-lg text-secondary-500 font-normal">
-                    {diaries.length}
+                    {diaries.length} of 4
                   </span>
                 )}
               </h1>
               <p className="text-secondary-600">
-                Your collection of precious memories and farewell messages
+                {diaries.length === 0
+                  ? 'Create your first diary to start collecting farewell messages'
+                  : diaries.length < 4
+                  ? `You can create ${4 - diaries.length} more ${4 - diaries.length === 1 ? 'diary' : 'diaries'}`
+                  : 'You\'ve reached the maximum of 4 diaries'}
               </p>
             </div>
 
@@ -139,7 +138,7 @@ export default function Dashboard() {
         )}
 
         {/* Floating Action Button */}
-        <FloatingActionButton />
+        {diaries.length < 4 && <FloatingActionButton />}
       </main>
     </div>
   );
