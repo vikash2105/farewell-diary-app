@@ -18,6 +18,12 @@ export interface Diary {
   updatedAt: string;
 }
 
+export interface DashboardDiary extends Pick<Diary, 'id' | 'title' | 'uniqueLink' | 'updatedAt'> {
+  description: string | null;
+  contributorCount: number;
+  totalNotes: number;
+}
+
 export interface DiarySettings {
   allowAnonymous?: boolean;
   requireApproval?: boolean;

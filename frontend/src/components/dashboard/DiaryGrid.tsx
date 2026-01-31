@@ -5,19 +5,10 @@
 
 import { useNavigate } from 'react-router-dom';
 import DiaryCard from './DiaryCard';
-
-interface Diary {
-  id: string;
-  title: string;
-  description: string | null;
-  contributorCount: number;
-  totalNotes: number;
-  updatedAt: string;
-  uniqueLink: string;
-}
+import { DashboardDiary } from '../../types';
 
 interface DiaryGridProps {
-  diaries: Diary[];
+  diaries: DashboardDiary[];
   loading?: boolean;
 }
 
@@ -86,7 +77,7 @@ export default function DiaryGrid({ diaries, loading = false }: DiaryGridProps) 
           key={diary.id}
           diary={diary}
           colorIndex={index}
-          onClick={() => navigate(`/diary/${diary.uniqueLink}`)}
+          onClick={() => navigate(`/notes`)}
         />
       ))}
     </div>

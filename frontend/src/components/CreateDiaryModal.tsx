@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
-import { diaryApi } from '../api/client';
+import { diaryApi } from '../api';
 
 export default function CreateDiaryModal({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState('');

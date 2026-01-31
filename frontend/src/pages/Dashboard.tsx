@@ -14,24 +14,12 @@ import { toast } from 'sonner';
 import DiaryGrid from '../components/dashboard/DiaryGrid';
 import DiaryFilters from '../components/dashboard/DiaryFilters';
 import FloatingActionButton from '../components/dashboard/FloatingActionButton';
-import { apiClient } from '../api/client';
-
-// Update this import to match your actual API client location
-// import { diaryApi } from '../api/diaryApi';
-
-interface Diary {
-  id: string;
-  title: string;
-  description: string | null;
-  contributorCount: number;
-  totalNotes: number;
-  updatedAt: string;
-  uniqueLink: string;
-}
+import { diaryApi } from '../api';
+import { DashboardDiary } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [diaries, setDiaries] = useState<Diary[]>([]);
+  const [diaries, setDiaries] = useState<DashboardDiary[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'shared' | 'private'>('all');
 
@@ -41,7 +29,7 @@ export default function Dashboard() {
 
   const loadDiaries = async () => {
     try {
-      const response = await apiClient.get('/diary');
+      const response = await diaryApi.getUserDiaries();
       setDiaries(response.data.data || []);
     } catch (error) {
       console.error('Failed to load diaries:', error);
