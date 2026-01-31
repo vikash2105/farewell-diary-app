@@ -34,7 +34,7 @@ export interface FarewellNote {
   id: string;
   diaryId: string;
   authorName: string;
-  authorEmail: string;
+  authorEmail: string | null;
   content: string;
   fontStyle: 'default' | 'handwriting' | 'serif' | 'cursive';
   isAnonymous: boolean;
@@ -52,6 +52,7 @@ export interface CreateNoteDto {
   content: string;
   fontStyle?: 'default' | 'handwriting' | 'serif' | 'cursive';
   isAnonymous?: boolean;
+  authorName?: string;
 }
 
 export interface ApiResponse<T = any> {

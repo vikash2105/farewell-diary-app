@@ -99,14 +99,26 @@ export class DiaryController {
   static async getMyDiaryNotes(req: Request, res: Response): Promise<void> {
     if (!req.user) throw new ApiError(401, "Authentication required");
 
-    const diary = await DiaryService.findByUserId(req.user.id);
+    let diary;
+    const diaryId = req.query.diaryId as string;
+
+    if (diaryId) {
+      diary = await DiaryService.findById(diaryId);
+      if (!diary || diary.userId !== req.user.id) {
+        throw new ApiError(404, "Diary not found or unauthorized");
+      }
+    } else {
+      diary = await DiaryService.findByUserId(req.user.id);
+    }
+
     if (!diary) throw new ApiError(404, "Diary not found");
 
-    const notes = await FarewellNoteService.getByDiaryId(diary.id);
+    // Pass true to decrypt content for owner
+    const notes = await FarewellNoteService.getByDiaryId(diary.id, true);
 
     res.json({
       success: true,
-      data: { notes, total: notes.length },
+      data: { notes, total: notes.length, diary },
     });
   }
 
