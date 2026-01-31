@@ -33,12 +33,16 @@ export const createApp = (): Application => {
   );
 
   // 🔥 CORS MUST MATCH FRONTEND EXACTLY
-  app.use(
-    cors({
-      origin: env.FRONTEND_URL,
-      credentials: true,
-    })
-  );
+ app.use(
+  cors({
+    origin: [
+      'http://localhost:5173',          // frontend local (Vite)
+      env.FRONTEND_URL,                 // frontend prod (Vercel)
+    ],
+    credentials: true,
+  })
+);
+
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
