@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import AvatarUpload from '../components/profile/AvatarUpload';
 import ProfileForm from '../components/profile/ProfileForm';
-import { userApi } from '../api/userApi';
+import { userApi } from '../api/client';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -21,7 +21,8 @@ export default function Profile() {
 
   const loadProfile = async () => {
   try {
-    const data = await userApi.getProfile();
+    const response = await userApi.getProfile();
+    const data = response.data.data;
     if (!data) {
       console.error('Profile data is null');
       setProfile(null);

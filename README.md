@@ -1,410 +1,250 @@
-# 🌹 Farewell Diary
+# Farewell Diary 💌
 
-A production-grade, full-stack emotional platform where users can create private diaries and receive heartfelt farewell notes from friends. Built with modern tech stack and industry best practices.
+> A private, secure platform for preserving farewell messages from loved ones.
 
-## 📋 Overview
+Farewell Diary allows you to create a personal diary where friends and family can leave heartfelt farewell messages. Perfect for preserving memories, milestone events, or simply collecting well-wishes from the people who matter most.
 
-**Farewell Diary** allows users to:
-- Create a personal farewell diary with a unique shareable link
-- Share the link with friends who can write farewell notes
-- All notes are encrypted and private - only the diary owner can read them
-- Friends can write but cannot see other notes
-- Beautiful handwriting-style fonts for emotional expression
-- Secure Google OAuth authentication
+## ✨ Features
 
-## 🏗 Architecture
+- **🔐 Secure Authentication** - Google OAuth integration
+- **💝 Private Diaries** - Create and manage multiple farewell diaries
+- **🔗 Shareable Links** - Unique, secure links for contributors
+- **📝 Rich Notes** - Multiple font styles and anonymous option
+- **👤 User Profiles** - Customizable profiles with avatar support
+- **📱 Responsive Design** - Works perfectly on all devices
+- **🎨 Beautiful UI** - Modern, clean interface with Tailwind CSS
+- **🛡️ Privacy First** - Encrypted data, rate limiting, and XSS protection
 
-This project follows a **completely separated frontend and backend** architecture:
+## 🚀 Quick Start
 
-### Backend
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Drizzle ORM
-- **Authentication**: Passport.js (Google OAuth 2.0)
-- **Security**: Helmet, CORS, Rate Limiting, AES Encryption
-- **Session Storage**: PostgreSQL (connect-pg-simple)
+### Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd farewell-diary-app
+   ```
+
+2. **Follow the development guide**
+   ```bash
+   # See DEVELOPMENT.md for detailed setup instructions
+   open DEVELOPMENT.md
+   ```
+
+3. **Start developing**
+   ```bash
+   # Backend
+   cd backend && npm install && npm run dev
+   
+   # Frontend (new terminal)
+   cd frontend && npm install && npm run dev
+   ```
+
+### Production Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions to Render + Vercel.
+
+## 📖 Documentation
+
+- **[Development Guide](./DEVELOPMENT.md)** - Complete local setup instructions
+- **[Deployment Guide](./DEPLOYMENT.md)** - Production deployment to Render + Vercel
+- **[API Documentation](#api-documentation)** - API endpoints reference
+
+## 🏗️ Tech Stack
 
 ### Frontend
-- **Framework**: React 18
-- **Language**: TypeScript
-- **Build Tool**: Vite
-- **Styling**: TailwindCSS
-- **State Management**: Zustand + TanStack Query
-- **Routing**: React Router v6
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **React Router** - Client-side routing
+- **Tailwind CSS** - Styling
+- **Zustand** - State management
+- **React Query** - Server state management
+- **Axios** - HTTP client
+- **Framer Motion** - Animations
+- **Sonner** - Toast notifications
+
+### Backend
+- **Node.js** - Runtime
+- **Express** - Web framework
+- **TypeScript** - Type safety
+- **PostgreSQL** - Database
+- **Drizzle ORM** - Database ORM
+- **Passport** - OAuth authentication
+- **Express Session** - Session management
+- **Zod** - Schema validation
+- **Winston** - Logging
+- **Helmet** - Security headers
 
 ## 📁 Project Structure
 
 ```
 farewell-diary-app/
-├── backend/                 # Node.js + Express API
+├── backend/                 # Node.js + Express backend
 │   ├── src/
-│   │   ├── config/         # App configuration
-│   │   ├── controllers/    # Request handlers
-│   │   ├── db/            # Database schema & migrations
-│   │   ├── middleware/    # Express middleware
-│   │   ├── routes/        # API routes
-│   │   ├── services/      # Business logic
-│   │   ├── utils/         # Utility functions
-│   │   ├── app.ts         # Express app setup
-│   │   └── index.ts       # Entry point
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── drizzle.config.ts
-│   └── README.md
+│   │   ├── controllers/    # Route handlers
+│   │   ├── services/       # Business logic
+│   │   ├── routes/         # API routes
+│   │   ├── middleware/     # Express middleware
+│   │   ├── db/            # Database schema
+│   │   ├── config/        # Configuration
+│   │   └── utils/         # Utilities
+│   └── package.json
 │
-└── frontend/               # React + Vite app
-    ├── src/
-    │   ├── api/           # API client
-    │   ├── components/    # Reusable components
-    │   ├── pages/         # Page components
-    │   ├── stores/        # State management
-    │   ├── types/         # TypeScript types
-    │   ├── App.tsx        # Main app
-    │   └── main.tsx       # Entry point
-    ├── package.json
-    ├── tsconfig.json
-    ├── vite.config.ts
-    ├── tailwind.config.js
-    └── README.md
+├── frontend/               # React + Vite frontend
+│   ├── src/
+│   │   ├── pages/         # Page components
+│   │   ├── components/    # Reusable components
+│   │   ├── api/          # API client
+│   │   ├── stores/       # State management
+│   │   └── types/        # TypeScript types
+│   └── package.json
+│
+├── DEVELOPMENT.md         # Development setup guide
+├── DEPLOYMENT.md          # Production deployment guide
+└── README.md             # This file
 ```
 
-## 🚀 Quick Start
+## 🔧 Environment Variables
 
-### Prerequisites
-
-- **Node.js** 18+ and npm
-- **PostgreSQL** 14+
-- **Google Cloud Console** project (for OAuth)
-
-### 1. Clone the Repository
+### Backend (.env)
 
 ```bash
-git clone <repository-url>
-cd farewell-diary-app
+NODE_ENV=development
+PORT=5000
+DATABASE_URL=postgresql://user:password@localhost:5432/farewell_diary
+SESSION_SECRET=your-session-secret
+ENCRYPTION_KEY=exactly-32-chars
+JWT_SECRET=your-jwt-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/v1/auth/google/callback
+FRONTEND_URL=http://localhost:5173
+API_VERSION=v1
 ```
 
-### 2. Set Up Backend
+### Frontend (.env.local)
 
 ```bash
-cd backend
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env
-
-# Edit .env and add your configuration:
-# - DATABASE_URL (PostgreSQL connection string)
-# - SESSION_SECRET (random 32+ character string)
-# - JWT_SECRET (random 32+ character string)
-# - ENCRYPTION_KEY (exactly 32 characters)
-# - GOOGLE_CLIENT_ID (from Google Console)
-# - GOOGLE_CLIENT_SECRET (from Google Console)
-# - GOOGLE_CALLBACK_URL
-# - FRONTEND_URL
-
-# Create PostgreSQL database
-createdb farewell_diary
-
-# Generate and run migrations
-npm run db:generate
-npm run db:migrate
-
-# Start development server
-npm run dev
+VITE_API_URL=http://localhost:5000/api
 ```
 
-Backend will run at `http://localhost:5000`
+See `.env.example` files in each directory for complete documentation.
 
-### 3. Set Up Frontend
+## API Documentation
+
+### Base URLs
+
+- **Development**: `http://localhost:5000/api`
+- **Production**: `https://your-app.onrender.com/api`
+
+### Endpoints
+
+#### Authentication (`/v1/auth`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/google` | Start Google OAuth | Public |
+| GET | `/google/callback` | OAuth callback | Public |
+| GET | `/me` | Get current user | Required |
+| POST | `/logout` | Logout user | Required |
+
+#### Diaries (`/v1/diary`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/` | Create diary | Required |
+| GET | `/` | Get user's diaries | Required |
+| GET | `/me` | Get user's diary details | Required |
+| GET | `/me/notes` | Get all notes | Required |
+| GET | `/:link` | Get public diary | Public |
+| PUT | `/:id` | Update diary | Required |
+| POST | `/:id/regenerate-link` | Regenerate share link | Required |
+
+#### Notes (`/v1/notes`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/:link` | Create farewell note | Required |
+| GET | `/:link/check` | Check if user wrote note | Optional |
+| DELETE | `/:id` | Delete note | Required |
+
+#### User (`/user`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/profile` | Get user profile | Required |
+| PATCH | `/profile` | Update profile | Required |
+| POST | `/avatar` | Upload avatar | Required |
+| DELETE | `/avatar` | Remove avatar | Required |
+
+#### Public (`/public`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/testimonials` | Get testimonials | Public |
+| POST | `/testimonials` | Submit testimonial | Optional |
+| GET | `/donations` | Get donations | Public |
+| POST | `/donations` | Record donation | Optional |
+
+## 🛠️ Development Commands
+
+### Backend
 
 ```bash
-cd ../frontend
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env
-
-# Edit .env:
-# VITE_API_URL=http://localhost:5000/api/v1
-# VITE_FRONTEND_URL=http://localhost:5173
-
-# Start development server
-npm run dev
+npm run dev          # Start development server
+npm run build        # Build for production
+npm start            # Start production server
+npm run lint         # Lint code
+npm run format       # Format code
+npm run db:push      # Push schema to database
+npm run drizzle:generate  # Generate migrations
+npm run drizzle:migrate   # Run migrations
 ```
 
-Frontend will run at `http://localhost:5173`
-
-### 4. Configure Google OAuth
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable Google+ API
-4. Go to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
-5. Configure OAuth consent screen
-6. Add authorized redirect URIs:
-   - Development: `http://localhost:5000/api/v1/auth/google/callback`
-   - Production: `https://your-api-domain.com/api/v1/auth/google/callback`
-7. Copy **Client ID** and **Client Secret** to backend `.env`
-
-## 🔐 Security Features
-
-1. **Authentication**
-   - Google OAuth 2.0 for secure login
-   - Session-based authentication
-   - Secure cookie settings
-
-2. **Data Protection**
-   - Farewell notes encrypted at rest (AES encryption)
-   - Environment variables for secrets
-   - PostgreSQL for secure data storage
-
-3. **API Security**
-   - Helmet.js for HTTP headers
-   - CORS protection
-   - Rate limiting (100 requests per 15 minutes)
-   - Input validation with Zod
-   - SQL injection prevention (Drizzle ORM)
-
-4. **Access Control**
-   - Diary owners can ONLY read notes
-   - Friends can ONLY write notes
-   - Link-based diary access
-   - One note per user per diary
-
-## 📊 Database Schema
-
-### Users
-```sql
-- id (UUID, PK)
-- email (VARCHAR, UNIQUE)
-- name (VARCHAR)
-- profilePicture (TEXT)
-- googleId (VARCHAR, UNIQUE)
-- isActive (BOOLEAN)
-- createdAt, updatedAt (TIMESTAMP)
-```
-
-### Diaries
-```sql
-- id (UUID, PK)
-- userId (UUID, FK → users)
-- uniqueLink (VARCHAR, UNIQUE)
-- title (VARCHAR)
-- description (TEXT)
-- settings (JSONB)
-- isActive (BOOLEAN)
-- createdAt, updatedAt (TIMESTAMP)
-```
-
-### Farewell Notes
-```sql
-- id (UUID, PK)
-- diaryId (UUID, FK → diaries)
-- authorId (UUID, FK → users)
-- authorName (VARCHAR)
-- authorEmail (VARCHAR)
-- encryptedContent (TEXT)  # AES encrypted
-- fontStyle (VARCHAR)
-- isAnonymous (BOOLEAN)
-- createdAt, updatedAt (TIMESTAMP)
-```
-
-## 🛣 API Endpoints
-
-### Authentication
-- `GET /api/v1/auth/google` - Initiate Google OAuth
-- `GET /api/v1/auth/google/callback` - OAuth callback
-- `GET /api/v1/auth/me` - Get current user
-- `POST /api/v1/auth/logout` - Logout
-
-### Diary Management
-- `POST /api/v1/diary` - Create diary
-- `GET /api/v1/diary/me` - Get my diary
-- `GET /api/v1/diary/:link` - Get public diary info
-- `GET /api/v1/diary/me/notes` - Get all my notes
-- `PUT /api/v1/diary/:id` - Update diary
-- `POST /api/v1/diary/:id/regenerate-link` - New link
-
-### Farewell Notes
-- `POST /api/v1/notes/:link` - Create note
-- `GET /api/v1/notes/:link/check` - Check if wrote note
-- `DELETE /api/v1/notes/:id` - Delete note
-
-## 🎯 User Flow
-
-1. **User Registration/Login**
-   - Click "Get Started" → Google OAuth → Redirected to Dashboard
-
-2. **Create Diary**
-   - Fill in title and description → Get unique shareable link
-
-3. **Share Link**
-   - Copy link → Send to friends
-
-4. **Friend Writes Note**
-   - Friend clicks link → Login with Google → Write farewell note
-   - Choose font style (default, handwriting, serif, cursive)
-   - Option to post anonymously
-
-5. **View Notes**
-   - Owner views all notes in dashboard
-   - Notes displayed with chosen font styles
-   - See author name (or "Anonymous") and timestamp
-
-## 🌐 Deployment
-
-### Backend Deployment (Recommended: Railway, Render, Fly.io)
+### Frontend
 
 ```bash
-# Build
-npm run build
-
-# Set environment variables in hosting platform
-# Deploy dist/ folder
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Lint code
+npm run format       # Format code
 ```
 
-### Frontend Deployment (Recommended: Vercel, Netlify)
+## 🔒 Security Features
 
-```bash
-# Build
-npm run build
-
-# Deploy dist/ folder
-```
-
-### Environment Variables Checklist
-
-**Backend:**
-- ✅ DATABASE_URL
-- ✅ SESSION_SECRET
-- ✅ JWT_SECRET
-- ✅ ENCRYPTION_KEY
-- ✅ GOOGLE_CLIENT_ID
-- ✅ GOOGLE_CLIENT_SECRET
-- ✅ GOOGLE_CALLBACK_URL
-- ✅ FRONTEND_URL
-- ✅ NODE_ENV=production
-
-**Frontend:**
-- ✅ VITE_API_URL
-- ✅ VITE_FRONTEND_URL
-
-## 🧪 Development
-
-### Backend Development
-
-```bash
-cd backend
-npm run dev          # Start with hot reload
-npm run build       # Compile TypeScript
-npm run lint        # Run ESLint
-npm run format      # Format with Prettier
-npm test           # Run tests
-```
-
-### Frontend Development
-
-```bash
-cd frontend
-npm run dev         # Start dev server
-npm run build       # Build for production
-npm run preview     # Preview production build
-npm run lint        # Run ESLint
-npm run format      # Format with Prettier
-```
-
-## 📈 Production Best Practices
-
-1. **Security**
-   - Use strong secrets (min 32 characters)
-   - Enable HTTPS
-   - Set secure cookie flags
-   - Rate limiting configured
-   - Input validation on all endpoints
-
-2. **Performance**
-   - Database indexes on frequently queried fields
-   - Connection pooling
-   - Frontend code splitting
-   - Asset optimization
-
-3. **Monitoring**
-   - Application logs (Winston)
-   - Error tracking
-   - Performance monitoring
-   - Database query logging
-
-4. **Backup**
-   - Regular database backups
-   - Encrypted backup storage
-   - Disaster recovery plan
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Database connection failed**
-```bash
-# Check PostgreSQL is running
-sudo systemctl status postgresql
-
-# Test connection
-psql -U postgres -d farewell_diary
-```
-
-**Google OAuth not working**
-- Verify credentials in .env match Google Console
-- Check callback URL is correctly configured
-- Ensure OAuth consent screen is published
-
-**Frontend can't connect to backend**
-- Check backend is running on correct port
-- Verify VITE_API_URL in frontend .env
-- Check CORS configuration in backend
-
-## 🎨 Customization
-
-### Adding New Font Styles
-
-1. Add font to `frontend/index.html`
-2. Update Tailwind config
-3. Add option to `CreateNoteDto` type
-4. Update font selector in WriteFarewellNote page
-
-### Changing Theme Colors
-
-Edit `frontend/tailwind.config.js`:
-```javascript
-colors: {
-  primary: { ... },  // Change these values
-  secondary: { ... }
-}
-```
-
-## 📝 License
-
-MIT License - Feel free to use this project for your own purposes.
+- **Session-based Authentication** - Secure session management with PostgreSQL
+- **CSRF Protection** - Built-in protection against cross-site request forgery
+- **XSS Prevention** - Input sanitization and Content Security Policy
+- **Rate Limiting** - Protection against abuse and DDoS
+- **Data Encryption** - Sensitive data encrypted at rest
+- **Secure Cookies** - HttpOnly, Secure, SameSite cookies
+- **SQL Injection Prevention** - Parameterized queries with Drizzle ORM
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run linting and tests
-5. Submit a pull request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📞 Support
+## 📝 License
 
-For issues or questions:
-- Check individual README files in `/backend` and `/frontend`
-- Review troubleshooting sections
-- Create an issue in the repository
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with ❤️ for preserving precious memories
+- Inspired by the need to keep farewell messages safe and accessible
+- Thanks to all contributors and supporters
+
+## 📧 Support
+
+- **Issues**: [GitHub Issues](https://github.com/your-username/farewell-diary/issues)
+- **Email**: support@farewelldiary.com
+- **Documentation**: See [DEVELOPMENT.md](./DEVELOPMENT.md) and [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 

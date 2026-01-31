@@ -14,10 +14,7 @@ import { toast } from 'sonner';
 import DiaryGrid from '../components/dashboard/DiaryGrid';
 import DiaryFilters from '../components/dashboard/DiaryFilters';
 import FloatingActionButton from '../components/dashboard/FloatingActionButton';
-import { apiClient } from '../api/client';
-
-// Update this import to match your actual API client location
-// import { diaryApi } from '../api/diaryApi';
+import { diaryApi } from '../api/client';
 
 interface Diary {
   id: string;
@@ -41,7 +38,7 @@ export default function Dashboard() {
 
   const loadDiaries = async () => {
     try {
-      const response = await apiClient.get('/diary');
+      const response = await diaryApi.getUserDiaries();
       setDiaries(response.data.data || []);
     } catch (error) {
       console.error('Failed to load diaries:', error);
@@ -82,7 +79,7 @@ export default function Dashboard() {
           </div>
 
           <button
-            onClick={() => navigate('/Profile')}
+            onClick={() => navigate('/profile')}
             className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors"
           >
             <User className="w-5 h-5" />

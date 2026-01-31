@@ -13,6 +13,7 @@ import NotFound from './pages/NotFound';
 import Homepage from './pages/Homepage';
 import Profile from './pages/Profile';
 import CreateDiary from './pages/CreateDiary';
+import ViewNotes from './pages/ViewNotes';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -80,6 +81,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/notes"
+            element={
+              <ProtectedRoute>
+                <ViewNotes />
               </ProtectedRoute>
             }
           />
