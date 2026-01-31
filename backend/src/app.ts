@@ -12,8 +12,6 @@ const { Pool } = require("pg");
 
 import { configurePassport } from "./config/passport";
 import routes from "./routes";
-import publicRoutes from "./routes/publicRoutes";
-import userRoutes from "./routes/userRoutes";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { logger } from "./utils/logger";
 import { generalLimiter } from "./middleware/rateLimit";
@@ -87,8 +85,6 @@ export const createApp = (): Application => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.use("/api/public", publicRoutes);
-  app.use("/api/user", userRoutes);
   app.use(`/api/${env.API_VERSION}`, routes);
 
   app.get("/", (_req: Request, res: Response) => {

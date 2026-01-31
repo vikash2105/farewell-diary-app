@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
-import { authApi } from '../api/client';
+import { authApi } from '../api';
 
 // Sections
 import HeroSection from '../components/homepage/HeroSection';

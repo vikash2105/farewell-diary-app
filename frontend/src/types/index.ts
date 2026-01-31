@@ -18,15 +18,10 @@ export interface Diary {
   updatedAt: string;
 }
 
-export interface DashboardDiary {
-  id: string;
-  title: string;
+export interface DashboardDiary extends Pick<Diary, 'id' | 'title' | 'uniqueLink' | 'updatedAt'> {
   description: string | null;
   contributorCount: number;
   totalNotes: number;
-  updatedAt: string;
-  uniqueLink: string;
-  isActive: boolean;
 }
 
 export interface DiarySettings {

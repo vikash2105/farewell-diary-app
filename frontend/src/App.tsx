@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { useEffect } from 'react';
-import { authApi } from './api/client';
+import { authApi } from './api';
 import { useAuthStore } from './stores/authStore';
 
 // Pages
@@ -84,7 +84,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
+
           <Route
             path="/notes"
             element={

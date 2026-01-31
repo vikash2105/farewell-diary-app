@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
-import { authApi } from '../../api/client';
+import { authApi } from '../../api';
 
 const quotes = [
   "Because Some Goodbyes Deserve to be Remembered",

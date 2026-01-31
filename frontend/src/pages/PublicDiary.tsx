@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BookOpen, Edit } from 'lucide-react';
-import { diaryApi, notesApi } from '../api/client';
+import { diaryApi, notesApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
 
 export default function PublicDiary() {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Heart, ArrowLeft, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { diaryApi } from '../api/client';
+import { diaryApi } from '../api';
 
 export default function CreateDiary() {
   const navigate = useNavigate();

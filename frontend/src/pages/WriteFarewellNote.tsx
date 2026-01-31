@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Send } from 'lucide-react';
 import { toast } from 'sonner';
-import { notesApi, authApi } from '../api/client';
+import { notesApi, authApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
 
 export default function WriteFarewellNote() {

@@ -5,17 +5,10 @@
 
 import { Heart, Users, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { DashboardDiary } from '../../types';
 
 interface DiaryCardProps {
-  diary: {
-    id: string;
-    title: string;
-    description: string | null;
-    contributorCount: number;
-    totalNotes: number;
-    updatedAt: string;
-    uniqueLink: string;
-  };
+  diary: DashboardDiary;
   colorIndex: number;
   onClick: () => void;
 }
