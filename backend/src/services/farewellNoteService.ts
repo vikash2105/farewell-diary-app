@@ -33,7 +33,9 @@ export class FarewellNoteService {
     return notes.length;
   }
 
-  static async hasUserWrittenNote(diaryId: string, authorEmail: string) {
+  static async hasUserWrittenNote(diaryId: string, authorEmail?: string) {
+    if (!authorEmail) return false;
+
     const [note] = await db
       .select()
       .from(farewellNotes)
@@ -50,9 +52,9 @@ export class FarewellNoteService {
 
   static async create(
     diaryId: string,
-    authorId: string,
+    authorId: string | null | undefined,
     authorName: string,
-    authorEmail: string,
+    authorEmail: string | null | undefined,
     content: string,
     fontStyle?: string,
     isAnonymous?: boolean
@@ -67,9 +69,9 @@ export class FarewellNoteService {
       .insert(farewellNotes)
       .values({
         diaryId,
-        authorId,
+        authorId: authorId ?? null,
         authorName,
-        authorEmail,
+        authorEmail: authorEmail ?? null,
         encryptedContent: encrypted, // 🔐 FIXED
         fontStyle: fontStyle ?? "default",
         isAnonymous: !!isAnonymous,

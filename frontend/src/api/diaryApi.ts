@@ -41,12 +41,12 @@ export const diaryApi = {
     apiClient.get<ApiResponse<Diary>>(`/diary/${link}`),
 
   /**
-   * Get notes for current user's diary
+   * Get notes for current user's diary (optionally for specific diary)
    */
-  getMyNotes: () =>
+  getMyNotes: (diaryId?: string) =>
     apiClient.get<
-      ApiResponse<{ notes: FarewellNote[]; total: number }>
-    >('/diary/me/notes'),
+      ApiResponse<{ notes: FarewellNote[]; total: number; diary?: Diary }>
+    >(diaryId ? `/diary/me/notes?diaryId=${diaryId}` : '/diary/me/notes'),
 
   /**
    * Update diary

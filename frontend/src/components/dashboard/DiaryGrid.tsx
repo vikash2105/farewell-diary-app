@@ -77,7 +77,7 @@ export default function DiaryGrid({ diaries, loading = false }: DiaryGridProps) 
           key={diary.id}
           diary={diary}
           colorIndex={index}
-          onClick={() => navigate(`/notes`)}
+          onClick={() => navigate(`/notes?diaryId=${diary.id}`)}
         />
       ))}
     </div>
