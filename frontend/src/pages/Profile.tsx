@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import AvatarUpload from '../components/profile/AvatarUpload';
 import ProfileForm from '../components/profile/ProfileForm';
-import { userApi } from '../api/client';
+import { userApi } from '../api';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -21,8 +21,7 @@ export default function Profile() {
 
   const loadProfile = async () => {
   try {
-    const response = await userApi.getProfile();
-    const data = response.data.data;
+    const data = await userApi.getProfile();
     if (!data) {
       console.error('Profile data is null');
       setProfile(null);
@@ -38,29 +37,29 @@ export default function Profile() {
 };
 
   const handleAvatarUpload = async (file: File) => {
-    const response = await userApi.uploadAvatar(file);
-    if (response.data.success && response.data.data?.avatarUrl) {
-      setProfile({ ...profile, profilePicture: response.data.data.avatarUrl });
+    const result = await userApi.uploadAvatar(file);
+    if (result.success && result.avatarUrl) {
+      setProfile({ ...profile, profilePicture: result.avatarUrl });
     } else {
-      throw new Error(response.data.message || 'Failed to upload avatar');
+      throw new Error(result.message);
     }
   };
 
   const handleAvatarRemove = async () => {
-    const response = await userApi.removeAvatar();
-    if (response.data.success) {
+    const result = await userApi.removeAvatar();
+    if (result.success) {
       setProfile({ ...profile, profilePicture: null });
     } else {
-      throw new Error(response.data.message || 'Failed to remove avatar');
+      throw new Error(result.message);
     }
   };
 
   const handleProfileSave = async (data: any) => {
-    const response = await userApi.updateProfile(data);
-    if (response.data.success) {
+    const result = await userApi.updateProfile(data);
+    if (result.success) {
       setProfile({ ...profile, ...data });
     } else {
-      throw new Error(response.data.message || 'Failed to update profile');
+      throw new Error(result.message);
     }
   };
 
