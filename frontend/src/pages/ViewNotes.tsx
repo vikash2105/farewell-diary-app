@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, MessageCircle, Share2, ExternalLink } from "lucide-react";
 import { diaryApi } from "../api";
 import { FarewellNote, Diary } from "../types";
@@ -7,26 +7,29 @@ import { toast } from "sonner";
 
 export default function ViewNotes() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const diaryId = searchParams.get('diaryId') || undefined;
+  
   const [notes, setNotes] = useState<FarewellNote[]>([]);
   const [diary, setDiary] = useState<Diary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      diaryApi.getMyNotes(),
-      diaryApi.getMy()
-    ])
-      .then(([notesRes, diaryRes]) => {
-          if (notesRes.data.data) {
-             setNotes(notesRes.data.data.notes);
-          }
-          if (diaryRes.data.data) {
-             setDiary(diaryRes.data.data.diary);
+    diaryApi.getMyNotes(diaryId)
+      .then((res) => {
+          if (res.data.data) {
+             setNotes(res.data.data.notes);
+             if (res.data.data.diary) {
+                setDiary(res.data.data.diary);
+             }
           }
       })
-      .catch(console.error)
+      .catch((error) => {
+        console.error(error);
+        toast.error("Failed to load notes");
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [diaryId]);
 
   const copyLink = () => {
     if (!diary) return;
@@ -38,6 +41,15 @@ export default function ViewNotes() {
   const openPublic = () => {
       if (!diary) return;
       window.open(`/diary/${diary.uniqueLink}`, '_blank');
+  };
+
+  const getFontClass = (style: string) => {
+    switch (style) {
+      case 'handwriting': return 'font-handwriting';
+      case 'serif': return 'font-serif';
+      case 'cursive': return 'font-cursive';
+      default: return 'font-sans';
+    }
   };
 
   if (loading) return (
@@ -84,7 +96,7 @@ export default function ViewNotes() {
         ) : (
             <div className="grid gap-6">
             {notes.map((n) => (
-                <div key={n.id} className={`p-8 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow font-${n.fontStyle || 'default'}`}>
+                <div key={n.id} className={`p-8 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow ${getFontClass(n.fontStyle)}`}>
                     <p className="text-xl mb-6 whitespace-pre-wrap text-gray-800 leading-relaxed">{n.content}</p>
                     <div className="flex items-center justify-between pt-6 border-t border-gray-50 text-sm text-gray-500 font-sans">
                         <div className="flex items-center gap-2">

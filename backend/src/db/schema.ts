@@ -89,7 +89,7 @@ export const farewellNotes = pgTable("farewell_notes", {
   }),
 
   authorName: varchar("author_name", { length: 255 }).notNull(),
-  authorEmail: varchar("author_email", { length: 255 }).notNull(),
+  authorEmail: varchar("author_email", { length: 255 }),
 
   encryptedContent: text("encrypted_content").notNull(),
 
