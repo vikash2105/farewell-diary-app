@@ -1,3 +1,8 @@
+/**
+ * DiaryFilters Component
+ * Tab-style filters for All/Shared/Private diaries
+ */
+
 interface DiaryFiltersProps {
   filter: 'all' | 'shared' | 'private';
   onFilterChange: (filter: 'all' | 'shared' | 'private') => void;
@@ -8,42 +13,45 @@ interface DiaryFiltersProps {
   };
 }
 
-const tabs = ['all', 'shared', 'private'] as const;
+export default function DiaryFilters({ filter, onFilterChange, counts }: DiaryFiltersProps) {
+  const filters = [
+    { id: 'all', label: 'All', count: counts?.all },
+    { id: 'shared', label: 'Shared', count: counts?.shared },
+    { id: 'private', label: 'Private', count: counts?.private },
+  ] as const;
 
-export default function DiaryFilters({
-  filter,
-  onFilterChange,
-  counts,
-}: DiaryFiltersProps) {
   return (
-    <div className="mb-8 flex items-center justify-between">
-      <h2 className="text-xl font-semibold text-gray-900">
-        My Collection
-        {counts && (
-          <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-sm text-gray-600">
-            {counts.all}
-          </span>
-        )}
-      </h2>
-
-      <div className="flex gap-6 text-sm">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => onFilterChange(tab)}
-            className={`relative pb-1 capitalize ${
-              filter === tab
-                ? 'text-indigo-600 font-medium'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {tab}
-            {filter === tab && (
-              <span className="absolute -bottom-1 left-0 h-0.5 w-full rounded bg-indigo-500" />
-            )}
-          </button>
-        ))}
-      </div>
+    <div className="flex gap-2 bg-white rounded-xl p-2 shadow-sm border border-secondary-200">
+      {filters.map((f) => (
+        <button
+          key={f.id}
+          onClick={() => onFilterChange(f.id)}
+          className={`
+            px-6 py-2 rounded-lg font-medium transition-all duration-200
+            ${
+              filter === f.id
+                ? 'bg-primary-500 text-white shadow-md'
+                : 'text-secondary-600 hover:bg-secondary-100'
+            }
+          `}
+        >
+          {f.label}
+          {counts && f.count !== undefined && (
+            <span
+              className={`
+                ml-2 px-2 py-0.5 rounded-full text-xs font-semibold
+                ${
+                  filter === f.id
+                    ? 'bg-white/20 text-white'
+                    : 'bg-secondary-200 text-secondary-600'
+                }
+              `}
+            >
+              {f.count}
+            </span>
+          )}
+        </button>
+      ))}
     </div>
   );
 }
