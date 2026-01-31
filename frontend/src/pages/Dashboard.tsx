@@ -128,7 +128,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => {
                     logout();
-                    navigate('/login');
+                    navigate('/Homepage');
                   }}
                   className="w-full px-4 py-3 flex items-center gap-3 text-red-600 hover:bg-red-50 transition"
                 >
