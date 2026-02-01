@@ -57,6 +57,8 @@ export const createApp = (): Application => {
     ssl: { rejectUnauthorized: false },
   });
 
+  const isProduction = env.NODE_ENV === "production";
+
   // 🔥 SESSION FIX (THIS WAS YOUR BUG)
   app.use(
     session({
@@ -72,8 +74,8 @@ export const createApp = (): Application => {
       proxy: true,
       cookie: {
         httpOnly: true,
-        secure: true,     // ✅ MUST BE TRUE
-        sameSite: "none", // ✅ MUST BE NONE
+        secure: isProduction, // ✅ Secure in prod, false in dev
+        sameSite: isProduction ? "none" : "lax", // ✅ None in prod, Lax in dev
         maxAge: 7 * 24 * 60 * 60 * 1000,
       },
     })
