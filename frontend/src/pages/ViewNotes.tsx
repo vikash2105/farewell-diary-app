@@ -101,10 +101,10 @@ export default function ViewNotes() {
                     <div className="flex items-center justify-between pt-6 border-t border-gray-50 text-sm text-gray-500 font-sans">
                         <div className="flex items-center gap-2">
                            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
-                              {n.isAnonymous ? '?' : n.authorName.charAt(0).toUpperCase()}
+                              {n.authorName.charAt(0).toUpperCase()}
                            </div>
                            <span className="font-medium">
-                              {n.isAnonymous ? 'Anonymous' : n.authorName}
+                              {n.authorName}
                            </span>
                         </div>
                         <time dateTime={n.createdAt}>

@@ -13,14 +13,13 @@ export default function WriteFarewellNote() {
 
   const [content, setContent] = useState('');
   const [fontStyle, setFontStyle] = useState<'default' | 'handwriting' | 'serif' | 'cursive'>('default');
-  const [isAnonymous, setIsAnonymous] = useState(false);
   const [authorName, setAuthorName] = useState('');
 
   const createNoteMutation = useMutation({
     mutationFn: () => notesApi.create(link!, {
       content,
       fontStyle,
-      isAnonymous,
+      isAnonymous: false,
       authorName: isAuthenticated ? undefined : authorName
     }),
     onSuccess: () => {
@@ -123,19 +122,6 @@ export default function WriteFarewellNote() {
                   </div>
                 </div>
 
-                {/* Anonymous Checkbox */}
-                <div className="flex items-center">
-                  <label className="flex items-center space-x-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={isAnonymous}
-                      onChange={(e) => setIsAnonymous(e.target.checked)}
-                      className="w-4 h-4 rounded text-primary-600 focus:ring-primary-500"
-                    />
-                    <span className="text-sm text-gray-700">Post anonymously (Name hidden from public view if applicable)</span>
-                  </label>
-                </div>
-
                 {/* Submit Button */}
                 <button
                   type="submit"
@@ -183,14 +169,12 @@ export default function WriteFarewellNote() {
                    {/* Footer */}
                    <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${
-                            isAnonymous ? 'bg-gray-100 text-gray-500' : 'bg-primary-100 text-primary-600'
-                         }`}>
-                            {isAnonymous ? '?' : (isAuthenticated ? user?.name?.charAt(0) : (authorName?.charAt(0) || '?'))}
+                         <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold bg-primary-100 text-primary-600">
+                            {isAuthenticated ? user?.name?.charAt(0) : (authorName?.charAt(0) || '?')}
                          </div>
                          <div className="flex flex-col">
                             <span className="font-semibold text-gray-900">
-                               {isAnonymous ? 'Anonymous' : (isAuthenticated ? user?.name : (authorName || 'Name'))}
+                               {isAuthenticated ? user?.name : (authorName || 'Name')}
                             </span>
                             <span className="text-xs text-gray-500">
                                {new Date().toLocaleDateString()}
