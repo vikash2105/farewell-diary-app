@@ -29,7 +29,6 @@ export const createFarewellNoteSchema = z.object({
   content: z.string().min(10, 'Note must be at least 10 characters').max(5000),
   fontStyle: z.enum(['default', 'handwriting', 'serif', 'cursive']).default('default'),
   isAnonymous: z.boolean().default(false),
-  authorName: z.string().optional(),
 });
 
 /**

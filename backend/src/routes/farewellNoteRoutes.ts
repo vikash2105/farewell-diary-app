@@ -45,7 +45,7 @@ router.post(
   '/:link',
   limitRequestSize(LIMITS.NOTE),
   noteCreationLimiter,
-  optionalAuth,
+  isAuthenticated,
   sanitizeInput,
   validateBody(createFarewellNoteSchema),
   FarewellNoteController.createNote

@@ -35,6 +35,13 @@ export default function Dashboard() {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Check for auth redirect
+    const returnUrl = sessionStorage.getItem('auth_return_url');
+    if (returnUrl) {
+      sessionStorage.removeItem('auth_return_url');
+      navigate(returnUrl, { replace: true });
+      return;
+    }
     loadDiaries();
   }, []);
 
