@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Send, Type, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { notesApi } from '../api';
+import { getBaseUrl } from '../api/client';
 import { useAuthStore } from '../stores/authStore';
 
 export default function WriteFarewellNote() {
@@ -17,14 +18,22 @@ export default function WriteFarewellNote() {
   const [authorName, setAuthorName] = useState('');
 
   const createNoteMutation = useMutation({
-    mutationFn: () => notesApi.create(link!, {
-      content,
-      fontStyle,
-      isAnonymous,
-      authorName: isAuthenticated ? undefined : authorName
+    mutationFn: (data: {
+      content: string;
+      fontStyle: 'default' | 'handwriting' | 'serif' | 'cursive';
+      isAnonymous: boolean;
+      authorName: string
+    }) => notesApi.create(link!, {
+      content: data.content,
+      fontStyle: data.fontStyle,
+      isAnonymous: data.isAnonymous,
+      authorName: isAuthenticated ? undefined : data.authorName
     }),
     onSuccess: () => {
       toast.success('Your farewell note has been saved!');
+      if (link) {
+        sessionStorage.removeItem(`farewell_draft_${link}`);
+      }
       navigate(`/diary/${link}`);
     },
     onError: (error: any) => {
@@ -40,13 +49,53 @@ export default function WriteFarewellNote() {
       return;
     }
 
-    if (!isAuthenticated && authorName.trim().length < 2) {
-      toast.error('Please enter your name');
+    if (!isAuthenticated) {
+      // Save state and redirect to login
+      const draftKey = `farewell_draft_${link}`;
+      const draftData = {
+        content,
+        fontStyle,
+        isAnonymous,
+      };
+      sessionStorage.setItem(draftKey, JSON.stringify(draftData));
+
+      const redirectUrl = `/diary/${link}/write`;
+      window.location.href = `${getBaseUrl()}/auth/google?redirect=${redirectUrl}`;
       return;
     }
 
-    createNoteMutation.mutate();
+    createNoteMutation.mutate({ content, fontStyle, isAnonymous, authorName });
   };
+
+  useEffect(() => {
+    if (isAuthenticated && link) {
+      const draftKey = `farewell_draft_${link}`;
+      const savedDraft = sessionStorage.getItem(draftKey);
+
+      if (savedDraft) {
+        try {
+          const { content: savedContent, fontStyle: savedStyle, isAnonymous: savedAnonymous } = JSON.parse(savedDraft);
+
+          // Restore state to UI
+          setContent(savedContent);
+          setFontStyle(savedStyle);
+          setIsAnonymous(savedAnonymous);
+
+          // Auto submit
+          toast.info('Restoring your note...');
+          createNoteMutation.mutate({
+            content: savedContent,
+            fontStyle: savedStyle,
+            isAnonymous: savedAnonymous,
+            authorName: '' // Not used when authenticated
+          });
+        } catch (e) {
+          console.error('Failed to parse draft', e);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, link]);
 
   const getFontClass = (style: string) => {
     switch (style) {
