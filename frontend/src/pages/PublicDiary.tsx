@@ -2,12 +2,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BookOpen, Edit } from 'lucide-react';
 import { diaryApi, notesApi } from '../api';
-import { useAuthStore } from '../stores/authStore';
 
 export default function PublicDiary() {
   const { link } = useParams<{ link: string }>();
   const navigate = useNavigate();
-useAuthStore();
 
   const { data: diaryData, isLoading } = useQuery({
     queryKey: ['publicDiary', link],
@@ -25,6 +23,11 @@ useAuthStore();
     },
     enabled: !!link,
   });
+
+  // Check local storage for anonymous submission
+  const hasLocalSubmission = link ? localStorage.getItem(`farewell_note_written_${link}`) === 'true' : false;
+
+  const hasWritten = checkData?.hasWritten || hasLocalSubmission;
 
   const handleWriteNote = () => {
     navigate(`/diary/${link}/write`);
@@ -62,7 +65,7 @@ useAuthStore();
             <p className="text-secondary-600">
               This is your diary. Visit your dashboard to view notes.
             </p>
-          ) : checkData?.hasWritten ? (
+          ) : hasWritten ? (
             <p className="text-secondary-600">
               You've already written a farewell note. Thank you!
             </p>
