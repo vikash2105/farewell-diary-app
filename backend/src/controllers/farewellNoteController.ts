@@ -45,7 +45,7 @@ export class FarewellNoteController {
       authorEmail,
       req.body.content,
       req.body.fontStyle,
-      req.body.isAnonymous
+      false // FORCE NON-ANONYMOUS
     );
 
     res.status(201).json({
