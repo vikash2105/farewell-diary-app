@@ -14,9 +14,15 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
  */
 router.get(
   '/google',
-  passport.authenticate('google', {
-    scope: ['profile', 'email'],
-  })
+  (req, res, next) => {
+    const { redirect } = req.query;
+    const state = redirect ? Buffer.from(String(redirect)).toString('base64') : undefined;
+
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      state,
+    })(req, res, next);
+  }
 );
 
 /**
@@ -27,7 +33,21 @@ router.get(
   passport.authenticate('google', {
     failureRedirect: FRONTEND_URL,
   }),
-  (_req: Request, res: Response) => {
+  (req: Request, res: Response) => {
+    const { state } = req.query;
+
+    if (state) {
+      try {
+        const redirectUrl = Buffer.from(String(state), 'base64').toString('utf-8');
+        // Validate redirectUrl to be relative to prevent open redirect
+        if (redirectUrl.startsWith('/')) {
+          return res.redirect(`${FRONTEND_URL}${redirectUrl}`);
+        }
+      } catch (error) {
+        // Ignore invalid state
+      }
+    }
+
     res.redirect(`${FRONTEND_URL}/dashboard`);
   }
 );
