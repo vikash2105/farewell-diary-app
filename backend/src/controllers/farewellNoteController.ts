@@ -12,7 +12,8 @@ export class FarewellNoteController {
     let authorEmail: string | null = null;
     let isAnonymous = false;
 
-    if (req.user) {
+    // Safety check: req.user could be present but incomplete
+    if (req.user && req.user.id) {
       if (diary.userId === req.user.id) {
         throw new ApiError(403, "Cannot write note to your own diary");
       }
@@ -70,7 +71,7 @@ export class FarewellNoteController {
     const diary = await DiaryService.findByLink(req.params.link);
     if (!diary) throw new ApiError(404, "Diary not found");
 
-    const hasWritten = req.user
+    const hasWritten = (req.user && req.user.id)
       ? await FarewellNoteService.hasUserWrittenNote(
           diary.id,
           req.user.email
@@ -87,7 +88,7 @@ export class FarewellNoteController {
   }
 
   static async deleteNote(req: Request, res: Response): Promise<void> {
-    if (!req.user) throw new ApiError(401, "Authentication required");
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 
     await FarewellNoteService.delete(req.params.id, req.user.id);
 
