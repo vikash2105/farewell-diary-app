@@ -59,10 +59,15 @@ export const optionalAuth = (
   _res: Response,
   next: NextFunction
 ): void => {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user?.id) {
-    req.userId = String(req.user.id);
-    req.userEmail = req.user.email ? String(req.user.email) : undefined;
-    req.userName = req.user.name ? String(req.user.name) : undefined;
+  try {
+      if (req.isAuthenticated && req.isAuthenticated() && req.user?.id) {
+        req.userId = String(req.user.id);
+        req.userEmail = req.user.email ? String(req.user.email) : undefined;
+        req.userName = req.user.name ? String(req.user.name) : undefined;
+      }
+  } catch (e) {
+      // If isAuthenticated throws (e.g. session error), treat as guest
+      // Do nothing, just proceed
   }
 
   next();
