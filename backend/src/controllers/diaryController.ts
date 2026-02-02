@@ -5,7 +5,7 @@ import { ApiError } from "../middleware/errorHandler";
 
 export class DiaryController {
   static async createDiary(req: Request, res: Response): Promise<void> {
-    if (!req.user) throw new ApiError(401, "Authentication required");
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 
     const { title, description, settings } = req.body;
 
@@ -26,7 +26,7 @@ export class DiaryController {
   }
 
   static async getMyDiary(req: Request, res: Response): Promise<void> {
-    if (!req.user) throw new ApiError(401, "Authentication required");
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 
     const diary = await DiaryService.findByUserId(req.user.id);
     if (!diary) {
@@ -47,7 +47,7 @@ export class DiaryController {
   }
 
   static async getUserDiaries(req: Request, res: Response): Promise<void> {
-    if (!req.user) throw new ApiError(401, "Authentication required");
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 
     // ✅ FIXED: Return ALL user diaries (up to 4)
     const userDiaries = await DiaryService.findAllByUserId(req.user.id);
@@ -97,7 +97,7 @@ export class DiaryController {
   }
 
   static async getMyDiaryNotes(req: Request, res: Response): Promise<void> {
-    if (!req.user) throw new ApiError(401, "Authentication required");
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 
     let diary;
     const diaryId = req.query.diaryId as string;
@@ -123,7 +123,7 @@ export class DiaryController {
   }
 
   static async updateDiary(req: Request, res: Response): Promise<void> {
-    if (!req.user) throw new ApiError(401, "Authentication required");
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 
     const diary = await DiaryService.update(
       req.params.id,
@@ -135,7 +135,7 @@ export class DiaryController {
   }
 
   static async regenerateLink(req: Request, res: Response): Promise<void> {
-    if (!req.user) throw new ApiError(401, "Authentication required");
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 
     const diary = await DiaryService.regenerateLink(
       req.params.id,

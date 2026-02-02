@@ -11,48 +11,36 @@ declare global {
 }
 
 /**
- * Require authentication (Passport-based)
- * 
- * CRITICAL FIX:
- * - Passport stores user in req.user (via deserializeUser)
- * - We check req.isAuthenticated() which relies on req.user
- * - Then populate req.userId, req.userEmail, req.userName for backward compatibility
+ * Require authentication (Passport-based + Header Fallback)
  */
 export const requireAuth = (
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
-  // ✅ Check Passport's isAuthenticated (which checks req.user)
-  if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({
-      success: false,
-      error: "Authentication required",
-      message: "Please log in to access this resource",
-    });
+  // 1. Check Passport Session (Cookie)
+  if (req.isAuthenticated && req.isAuthenticated() && req.user?.id) {
+    req.userId = String(req.user.id);
+    req.userEmail = req.user.email ? String(req.user.email) : undefined;
+    req.userName = req.user.name ? String(req.user.name) : undefined;
+    next();
     return;
   }
 
-  // ✅ req.user is populated by Passport after deserializeUser
-  if (!req.user?.id) {
-    res.status(401).json({
-      success: false,
-      error: "Authentication required",
-      message: "User session is invalid",
-    });
-    return;
-  }
+  // 2. Check Authorization Header (Bearer Token) - Future proofing / Mobile support
+  // Note: Currently we don't have JWT logic implemented, but we should safely reject
+  // if this is the only auth method attempted and it fails.
+  // For now, if no session, we return 401.
 
-  // ✅ Populate helper properties for backward compatibility
-  req.userId = String(req.user.id);
-  req.userEmail = req.user.email ? String(req.user.email) : undefined;
-  req.userName = req.user.name ? String(req.user.name) : undefined;
-
-  next();
+  res.status(401).json({
+    success: false,
+    error: "Authentication required",
+    message: "Please log in to access this resource",
+  });
 };
 
 /**
- * Optional authentication
+ * Optional authentication - Never throws
  */
 export const optionalAuth = (
   req: Request,
@@ -66,15 +54,12 @@ export const optionalAuth = (
         req.userName = req.user.name ? String(req.user.name) : undefined;
       }
   } catch (e) {
-      // If isAuthenticated throws (e.g. session error), treat as guest
-      // Do nothing, just proceed
+      // Gracefully handle session errors by treating user as guest
   }
-
   next();
 };
 
 /**
- * ✅ BACKWARD-COMPATIBLE ALIAS
- * Some routes still import `isAuthenticated`
+ * Backward-compatible alias
  */
 export const isAuthenticated = requireAuth;

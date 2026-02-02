@@ -32,11 +32,26 @@ export const createApp = (): Application => {
     })
   );
 
-  // 🔥 CORS MUST MATCH FRONTEND EXACTLY
+  // 🔥 CORS HARDENED FOR PRODUCTION
+  const allowedOrigins = [
+    "https://farewell-diary-app.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ];
+
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          logger.warn(`Blocked CORS request from origin: ${origin}`);
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
       credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     })
   );
 
@@ -59,7 +74,7 @@ export const createApp = (): Application => {
 
   const isProduction = env.NODE_ENV === "production";
 
-  // 🔥 SESSION FIX (THIS WAS YOUR BUG)
+  // 🔥 SESSION CONFIGURATION - PRODUCTION SAFE
   app.use(
     session({
       name: "farewell.sid",
@@ -71,12 +86,13 @@ export const createApp = (): Application => {
       secret: env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
-      proxy: true,
+      proxy: true, // Required for Render
       cookie: {
         httpOnly: true,
-        secure: isProduction, // ✅ Secure in prod, false in dev
-        sameSite: isProduction ? "none" : "lax", // ✅ None in prod, Lax in dev
+        secure: isProduction, // ✅ Secure in prod (HTTPS), false in dev
+        sameSite: isProduction ? "none" : "lax", // ✅ None required for cross-site cookies
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        domain: isProduction ? undefined : undefined // Let browser handle domain unless sharing subdomains
       },
     })
   );
@@ -90,7 +106,7 @@ export const createApp = (): Application => {
   app.use(`/api/${env.API_VERSION}`, routes);
 
   app.get("/", (_req: Request, res: Response) => {
-    res.json({ success: true });
+    res.json({ success: true, message: "Farewell Diary API is running" });
   });
 
   app.use(notFoundHandler);
