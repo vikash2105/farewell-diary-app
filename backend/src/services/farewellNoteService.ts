@@ -14,7 +14,7 @@ export class FarewellNoteService {
 
     if (!isOwner) {
       // Public viewers never see content
-      return notes.map(({ encryptedContent, ...rest }) => rest);
+      return notes.map(({ encryptedContent: _encryptedContent, ...rest }) => rest);
     }
 
     // Owner sees decrypted content

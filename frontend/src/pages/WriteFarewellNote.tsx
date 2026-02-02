@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Send, Type, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import { notesApi, authApi } from '../api';
+import { notesApi, diaryApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
 
 export default function WriteFarewellNote() {
@@ -12,7 +12,15 @@ export default function WriteFarewellNote() {
   const { isAuthenticated, user } = useAuthStore();
 
   const [content, setContent] = useState('');
+  const [authorName, setAuthorName] = useState('');
   const [fontStyle, setFontStyle] = useState<'default' | 'handwriting' | 'serif' | 'cursive'>('default');
+
+  // Fetch diary details for title
+  const { data: diary } = useQuery({
+    queryKey: ['diaryPublic', link],
+    queryFn: () => diaryApi.getByLink(link!).then(res => res.data.data),
+    enabled: !!link
+  });
 
   // Load saved draft on mount
   useEffect(() => {
@@ -22,24 +30,32 @@ export default function WriteFarewellNote() {
 
     if (savedDraft) {
       try {
-        const { content: savedContent, fontStyle: savedFont } = JSON.parse(savedDraft);
+        const { content: savedContent, fontStyle: savedFont, authorName: savedName } = JSON.parse(savedDraft);
         if (savedContent) setContent(savedContent);
         if (savedFont) setFontStyle(savedFont);
+        if (savedName && !isAuthenticated) setAuthorName(savedName);
       } catch (e) {
         console.error('Failed to parse draft', e);
       }
     }
-  }, [link]);
+  }, [link, isAuthenticated]);
 
   const createNoteMutation = useMutation({
     mutationFn: () => notesApi.create(link!, {
       content,
       fontStyle,
       isAnonymous: false,
+      authorName: isAuthenticated ? undefined : authorName,
     }),
     onSuccess: () => {
       // Clear draft on success
       localStorage.removeItem(`farewell_draft_${link}`);
+      
+      // Mark as written in local storage for anonymous users to prevent duplicates/show status
+      if (!isAuthenticated) {
+          localStorage.setItem(`farewell_note_written_${link}`, 'true');
+      }
+
       toast.success('Your farewell note has been saved!');
       navigate(`/diary/${link}`);
     },
@@ -47,64 +63,6 @@ export default function WriteFarewellNote() {
       toast.error(error?.response?.data?.message || 'Failed to save note');
     },
   });
-
-  // Auto-submit if authenticated and draft exists
-  useEffect(() => {
-      if (isAuthenticated && link) {
-          const draftKey = `farewell_draft_${link}`;
-          const savedDraft = localStorage.getItem(draftKey);
-          if (savedDraft) {
-              // We have a draft and we are logged in.
-              // Note: We should probably wait for the user to click submit, OR strictly follow "Automatically submit"
-              // The requirement says "Automatically submit the saved note"
-              // BUT, createNoteMutation relies on 'content' state which might just have been set.
-              // Let's rely on the user clicking submit unless we are sure.
-              // Actually, if I just setContent, the state update is async.
-              // Safer approach: Check if we just returned from auth?
-              
-              // The user requirement says "Automatically submit the saved note".
-              // To do this safely, we need to know we ARE returning from auth.
-              // But 'Dashboard' handles the redirect.
-              // So when we land here, we are just viewing the page.
-              // If we auto-submit every time we visit the page with a draft, it might be annoying if the user cancels.
-              // However, the "Redirect Flow" implies immediate submission.
-              
-              // Let's implement auto-submit ONLY if we have content.
-              if (content.length >= 10 && !createNoteMutation.isPending && !createNoteMutation.isSuccess) {
-                  // Wait a tick for state to settle? Or just read from localStorage?
-                   try {
-                      const { content: savedContent } = JSON.parse(savedDraft);
-                      if (savedContent === content) {
-                         // Only auto-submit if the current state matches draft (meaning it's loaded)
-                         // And verify we actually want to auto-submit?
-                         // Maybe show a toast "Welcome back! Submitting your note..."
-                         
-                         // CAUTION: This might double-submit if not careful.
-                         // Let's stick to manual submission for now unless explicitly forced, 
-                         // OR add a flag 'should_auto_submit' in storage.
-                      }
-                   } catch(e){}
-              }
-          }
-      }
-  }, [isAuthenticated, link, content]); // This is tricky. 
-
-  // Better approach for auto-submit:
-  // When redirecting to login, set 'farewell_auto_submit_${link}' = 'true'.
-  // On return, if that flag exists, trigger submit.
-  
-  useEffect(() => {
-      if (isAuthenticated && link) {
-          const autoSubmitKey = `farewell_auto_submit_${link}`;
-          if (sessionStorage.getItem(autoSubmitKey) === 'true') {
-             if (content.length >= 10) {
-                 toast.info('Submitting your saved note...');
-                 createNoteMutation.mutate();
-                 sessionStorage.removeItem(autoSubmitKey);
-             }
-          }
-      }
-  }, [isAuthenticated, link, content]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,23 +72,20 @@ export default function WriteFarewellNote() {
       return;
     }
 
-    if (!isAuthenticated) {
-      // 1. Save Draft
-      localStorage.setItem(`farewell_draft_${link}`, JSON.stringify({ content, fontStyle }));
-      
-      // 2. Set Auto-Submit Flag
-      sessionStorage.setItem(`farewell_auto_submit_${link}`, 'true');
-
-      // 3. Set Return URL
-      sessionStorage.setItem('auth_return_url', window.location.pathname);
-
-      // 4. Redirect
-      authApi.loginWithGoogle();
-      return;
+    if (!isAuthenticated && authorName.trim().length < 2) {
+        toast.error('Please enter your name');
+        return;
     }
 
     createNoteMutation.mutate();
   };
+
+  // Auto-save draft
+  useEffect(() => {
+      if (!link) return;
+      const draftKey = `farewell_draft_${link}`;
+      localStorage.setItem(draftKey, JSON.stringify({ content, fontStyle, authorName }));
+  }, [content, fontStyle, authorName, link]);
 
   const getFontClass = (style: string) => {
     switch (style) {
@@ -144,7 +99,13 @@ export default function WriteFarewellNote() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 md:py-12">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">Write Your Farewell Note</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">Write Your Farewell Note</h1>
+        {diary && (
+             <p className="text-center text-secondary-600 mb-8">
+                 Writing for <span className="font-semibold">{diary.title}</span>
+             </p>
+        )}
+        {!diary && <div className="mb-8 h-6"></div>}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* EDITOR COLUMN */}
@@ -157,6 +118,21 @@ export default function WriteFarewellNote() {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 
+                {/* Author Name for Guests */}
+                {!isAuthenticated && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                    <input
+                      type="text"
+                      value={authorName}
+                      onChange={(e) => setAuthorName(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      placeholder="Enter your name"
+                      required
+                    />
+                  </div>
+                )}
+
                 {/* Font Selection */}
                 <div>
                    <label className="block text-sm font-medium text-gray-700 mb-2">Font Style</label>
@@ -204,11 +180,11 @@ export default function WriteFarewellNote() {
                   ) : (
                      <Send className="w-5 h-5" />
                   )}
-                  {isAuthenticated ? 'Submit Farewell Note' : 'Login & Submit Note'}
+                  {isAuthenticated ? 'Submit Farewell Note' : 'Submit Note'}
                 </button>
                 {!isAuthenticated && (
-                    <p className="text-center text-sm text-gray-500 mt-2">
-                        You will be redirected to login. Your note will be saved and automatically submitted.
+                    <p className="text-center text-xs text-gray-500 mt-2">
+                        You can submit as a guest without logging in.
                     </p>
                 )}
               </form>
@@ -246,11 +222,11 @@ export default function WriteFarewellNote() {
                    <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold bg-primary-100 text-primary-600">
-                            {user?.name?.charAt(0) || '?'}
+                            {(isAuthenticated ? (user?.name || '') : (authorName || '?')).charAt(0).toUpperCase()}
                          </div>
                          <div className="flex flex-col">
                             <span className="font-semibold text-gray-900">
-                               {user?.name || 'Your Name'}
+                               {isAuthenticated ? (user?.name || 'Your Name') : (authorName || 'Your Name')}
                             </span>
                             <span className="text-xs text-gray-500">
                                {new Date().toLocaleDateString()}
