@@ -3,7 +3,8 @@
  * For production, consider Redis or similar
  */
 
-import NodeCache from 'node-cache';
+import NodeCache = require('node-cache');
+
 
 /**
  * Cache instance with 5 minute default TTL
