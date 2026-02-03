@@ -16,7 +16,6 @@ export default function WriteFarewellNote() {
   const { isAuthenticated, user } = useAuthStore();
 
   const [content, setContent] = useState('');
-  const [authorName, setAuthorName] = useState('');
   const [fontStyle, setFontStyle] = useState<'default' | 'handwriting' | 'serif' | 'cursive'>('default');
 
   // Fetch diary details for title
@@ -60,18 +59,19 @@ export default function WriteFarewellNote() {
       }
     }
     
-    // Otherwise, load regular draft
-    const draftKey = `farewell_draft_${link}`;
-    const savedDraft = localStorage.getItem(draftKey);
+    // Otherwise, load regular draft (only for authenticated users)
+    if (isAuthenticated) {
+      const draftKey = `farewell_draft_${link}`;
+      const savedDraft = localStorage.getItem(draftKey);
 
-    if (savedDraft) {
-      try {
-        const { content: savedContent, fontStyle: savedFont, authorName: savedName } = JSON.parse(savedDraft);
-        if (savedContent) setContent(savedContent);
-        if (savedFont) setFontStyle(savedFont);
-        if (savedName && !isAuthenticated) setAuthorName(savedName);
-      } catch (e) {
-        console.error('Failed to parse draft', e);
+      if (savedDraft) {
+        try {
+          const { content: savedContent, fontStyle: savedFont } = JSON.parse(savedDraft);
+          if (savedContent) setContent(savedContent);
+          if (savedFont) setFontStyle(savedFont);
+        } catch (e) {
+          console.error('Failed to parse draft', e);
+        }
       }
     }
   }, [link, isAuthenticated]);
@@ -81,7 +81,6 @@ export default function WriteFarewellNote() {
       content,
       fontStyle,
       isAnonymous: false,
-      // ✅ FIXED: Remove authorName - backend now requires authentication
     }),
     onSuccess: () => {
       // Clear draft on success
@@ -142,7 +141,7 @@ export default function WriteFarewellNote() {
     createNoteMutation.mutate();
   };
 
-  // Auto-save draft (only for logged-in users now)
+  // Auto-save draft (only for logged-in users)
   useEffect(() => {
       if (!link || !isAuthenticated) return;
       const draftKey = `farewell_draft_${link}`;
@@ -179,9 +178,6 @@ export default function WriteFarewellNote() {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                
-                {/* ✅ FIXED: Removed author name field - only authenticated users can submit */}
-
                 {/* Font Selection */}
                 <div>
                    <label className="block text-sm font-medium text-gray-700 mb-2">Font Style</label>
