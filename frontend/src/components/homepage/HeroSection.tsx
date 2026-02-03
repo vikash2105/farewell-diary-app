@@ -1,3 +1,4 @@
+// frontend/src/components/homepage/HeroSection.tsx
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { authApi } from '../../api';
@@ -17,7 +18,9 @@ export default function HeroSection() {
     if (isAuthenticated) {
       navigate('/dashboard');
     } else {
-      authApi.loginWithGoogle();
+      // After login, redirect to dashboard
+      const callbackUrl = `${window.location.origin}/dashboard`;
+      authApi.loginWithGoogle(callbackUrl);
     }
   };
 

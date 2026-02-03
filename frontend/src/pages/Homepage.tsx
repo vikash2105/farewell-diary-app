@@ -1,3 +1,4 @@
+// frontend/src/pages/Homepage.tsx
 import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
@@ -18,7 +19,9 @@ export default function Homepage() {
     if (isAuthenticated) {
       navigate('/dashboard');
     } else {
-      authApi.loginWithGoogle();
+      // After login, redirect to dashboard
+      const callbackUrl = `${window.location.origin}/dashboard`;
+      authApi.loginWithGoogle(callbackUrl);
     }
   };
 
