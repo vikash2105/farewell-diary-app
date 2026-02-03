@@ -44,7 +44,7 @@ export default function PublicDiary() {
       navigate(`/diary/${link}/write`);
     } else {
       // Case B: Not authenticated - redirect to Google OAuth
-      // Construct callback URL to return to write page after login
+      // The write page (/diary/:link/write) will be set as callback URL
       const writePageUrl = `${window.location.origin}/diary/${link}/write`;
       const callbackUrl = encodeURIComponent(writePageUrl);
       const authUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/google?callbackUrl=${callbackUrl}`;
@@ -87,12 +87,12 @@ export default function PublicDiary() {
 
           {checkData?.isOwner ? (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <p className="text-blue-900 font-medium">
+              <p className="text-blue-900 font-medium mb-4">
                 This is your diary. Visit your dashboard to view notes.
               </p>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
               >
                 Go to Dashboard
               </button>
@@ -100,7 +100,7 @@ export default function PublicDiary() {
           ) : hasWritten ? (
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
               <p className="text-green-900 font-medium">
-                You've already written a farewell note. Thank you!
+                ✓ You've already written a farewell note. Thank you!
               </p>
             </div>
           ) : (
