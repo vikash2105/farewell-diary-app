@@ -1,3 +1,4 @@
+// backend/src/controllers/farewellNoteController.ts
 import { Request, Response } from "express";
 import { FarewellNoteService } from "../services/farewellNoteService";
 import { DiaryService } from "../services/diaryService";
@@ -5,51 +6,33 @@ import { ApiError } from "../middleware/errorHandler";
 
 export class FarewellNoteController {
   static async createNote(req: Request, res: Response): Promise<void> {
+    // ✅ FIXED: Now requires authentication - validated by middleware
+    if (!req.user || !req.user.id) {
+      throw new ApiError(401, "Authentication required to submit a note");
+    }
+
     const diary = await DiaryService.validateAccess(req.params.link);
 
-    let authorId: string | null = null;
-    let authorName: string;
-    let authorEmail: string | null = null;
-    let isAnonymous = false;
-
-    // Safety check: req.user could be present but incomplete
-    if (req.user && req.user.id) {
-      if (diary.userId === req.user.id) {
-        throw new ApiError(403, "Cannot write note to your own diary");
-      }
-
-      if (
-        await FarewellNoteService.hasUserWrittenNote(
-          diary.id,
-          req.user.email
-        )
-      ) {
-        throw new ApiError(400, "You already submitted a note");
-      }
-
-      authorId = req.user.id;
-      authorName = req.user.name;
-      authorEmail = req.user.email;
-      // Allow authenticated users to choose to be displayed as anonymous
-      isAnonymous = !!req.body.isAnonymous;
-    } else {
-      // Unauthenticated / Anonymous contribution
-      if (!req.body.authorName || req.body.authorName.trim().length === 0) {
-        throw new ApiError(400, "Name is required for guest contributions");
-      }
-      authorName = req.body.authorName;
-      // For unauthenticated users, we don't have an ID or email
-      authorId = null;
-      authorEmail = null;
-      // They are technically anonymous in terms of account linking, 
-      // but they provided a display name.
-      // logic: isAnonymous flag usually means "hide my name". 
-      // But here, for unauthenticated users, they provide a name to be shown.
-      // So isAnonymous should be false (because we want to show the provided name).
-      // Unless they explicitly checked "Stay Anonymous" (if we add that feature).
-      // For now, let's assume if they provide a name, they want it shown.
-      isAnonymous = !!req.body.isAnonymous; 
+    // Prevent users from writing notes to their own diary
+    if (diary.userId === req.user.id) {
+      throw new ApiError(403, "Cannot write note to your own diary");
     }
+
+    // Check if user has already written a note for this diary
+    if (
+      await FarewellNoteService.hasUserWrittenNote(
+        diary.id,
+        req.user.email
+      )
+    ) {
+      throw new ApiError(400, "You already submitted a note");
+    }
+
+    // ✅ SIMPLIFIED: Only authenticated users can submit notes
+    const authorId = req.user.id;
+    const authorName = req.user.name;
+    const authorEmail = req.user.email;
+    const isAnonymous = !!req.body.isAnonymous;
 
     const note = await FarewellNoteService.create(
       diary.id,
@@ -64,6 +47,7 @@ export class FarewellNoteController {
     res.status(201).json({
       success: true,
       data: { id: note.id },
+      message: "Farewell note submitted successfully"
     });
   }
 

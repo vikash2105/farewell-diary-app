@@ -1,3 +1,4 @@
+// frontend/src/pages/WriteFarewellNote.tsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -5,6 +6,9 @@ import { Send, Type, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { notesApi, diaryApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
+
+// ✅ FIXED: Add state preservation key
+const PENDING_NOTE_KEY = 'pending_farewell_note';
 
 export default function WriteFarewellNote() {
   const { link } = useParams<{ link: string }>();
@@ -22,9 +26,41 @@ export default function WriteFarewellNote() {
     enabled: !!link
   });
 
-  // Load saved draft on mount
+  // ✅ FIXED: Load saved draft on mount OR restore pending note after login
   useEffect(() => {
     if (!link) return;
+    
+    // Check if there's a pending note (user just logged in)
+    const pendingNote = sessionStorage.getItem(PENDING_NOTE_KEY);
+    if (pendingNote) {
+      try {
+        const { link: savedLink, content: savedContent, fontStyle: savedFont } = JSON.parse(pendingNote);
+        
+        // Only restore if it's for the same diary
+        if (savedLink === link) {
+          setContent(savedContent);
+          setFontStyle(savedFont);
+          
+          // Clear the pending note - we've restored it
+          sessionStorage.removeItem(PENDING_NOTE_KEY);
+          
+          // Immediately attempt to submit
+          setTimeout(() => {
+            const submitButton = document.querySelector<HTMLButtonElement>('button[type="submit"]');
+            if (submitButton && !submitButton.disabled) {
+              submitButton.click();
+            }
+          }, 500);
+          
+          return; // Don't load draft if we restored a pending note
+        }
+      } catch (e) {
+        console.error('Failed to parse pending note', e);
+        sessionStorage.removeItem(PENDING_NOTE_KEY);
+      }
+    }
+    
+    // Otherwise, load regular draft
     const draftKey = `farewell_draft_${link}`;
     const savedDraft = localStorage.getItem(draftKey);
 
@@ -45,21 +81,24 @@ export default function WriteFarewellNote() {
       content,
       fontStyle,
       isAnonymous: false,
-      authorName: isAuthenticated ? undefined : authorName,
+      // ✅ FIXED: Remove authorName - backend now requires authentication
     }),
     onSuccess: () => {
       // Clear draft on success
       localStorage.removeItem(`farewell_draft_${link}`);
       
-      // Mark as written in local storage for anonymous users to prevent duplicates/show status
-      if (!isAuthenticated) {
-          localStorage.setItem(`farewell_note_written_${link}`, 'true');
-      }
-
-      toast.success('Your farewell note has been saved!');
-      navigate(`/diary/${link}`);
+      // ✅ FIXED: Show success toast
+      toast.success('✅ Your farewell note was submitted successfully!', {
+        duration: 3000,
+      });
+      
+      // ✅ FIXED: Navigate to dashboard after brief delay
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     },
     onError: (error: any) => {
+      // This should rarely happen now due to interceptor
       toast.error(error?.response?.data?.message || 'Failed to save note');
     },
   });
@@ -67,25 +106,48 @@ export default function WriteFarewellNote() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ✅ FIXED: Pre-submission auth check
+    if (!isAuthenticated) {
+      // Save note data before redirecting to login
+      const noteData = {
+        link,
+        content,
+        fontStyle,
+      };
+      sessionStorage.setItem(PENDING_NOTE_KEY, JSON.stringify(noteData));
+      
+      // Construct the callback URL to return here after login
+      const callbackUrl = encodeURIComponent(window.location.href);
+      const authUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/google?callbackUrl=${callbackUrl}`;
+      
+      // Show informative toast
+      toast.info('Please log in to submit your farewell note', {
+        duration: 2000,
+      });
+      
+      // Redirect to Google OAuth
+      setTimeout(() => {
+        window.location.href = authUrl;
+      }, 500);
+      
+      return;
+    }
+
+    // Validation
     if (content.trim().length < 10) {
       toast.error('Please write at least 10 characters');
       return;
     }
 
-    if (!isAuthenticated && authorName.trim().length < 2) {
-        toast.error('Please enter your name');
-        return;
-    }
-
     createNoteMutation.mutate();
   };
 
-  // Auto-save draft
+  // Auto-save draft (only for logged-in users now)
   useEffect(() => {
-      if (!link) return;
+      if (!link || !isAuthenticated) return;
       const draftKey = `farewell_draft_${link}`;
-      localStorage.setItem(draftKey, JSON.stringify({ content, fontStyle, authorName }));
-  }, [content, fontStyle, authorName, link]);
+      localStorage.setItem(draftKey, JSON.stringify({ content, fontStyle }));
+  }, [content, fontStyle, link, isAuthenticated]);
 
   const getFontClass = (style: string) => {
     switch (style) {
@@ -118,20 +180,7 @@ export default function WriteFarewellNote() {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 
-                {/* Author Name for Guests */}
-                {!isAuthenticated && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
-                    <input
-                      type="text"
-                      value={authorName}
-                      onChange={(e) => setAuthorName(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      placeholder="Enter your name"
-                      required
-                    />
-                  </div>
-                )}
+                {/* ✅ FIXED: Removed author name field - only authenticated users can submit */}
 
                 {/* Font Selection */}
                 <div>
@@ -180,11 +229,13 @@ export default function WriteFarewellNote() {
                   ) : (
                      <Send className="w-5 h-5" />
                   )}
-                  {isAuthenticated ? 'Submit Farewell Note' : 'Submit Note'}
+                  {isAuthenticated ? 'Submit Farewell Note' : 'Sign In to Submit'}
                 </button>
+                
+                {/* ✅ FIXED: Updated help text */}
                 {!isAuthenticated && (
                     <p className="text-center text-xs text-gray-500 mt-2">
-                        You can submit as a guest without logging in.
+                        You'll be asked to sign in with Google before submitting.
                     </p>
                 )}
               </form>
@@ -222,11 +273,11 @@ export default function WriteFarewellNote() {
                    <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold bg-primary-100 text-primary-600">
-                            {(isAuthenticated ? (user?.name || '') : (authorName || '?')).charAt(0).toUpperCase()}
+                            {(user?.name || 'You').charAt(0).toUpperCase()}
                          </div>
                          <div className="flex flex-col">
                             <span className="font-semibold text-gray-900">
-                               {isAuthenticated ? (user?.name || 'Your Name') : (authorName || 'Your Name')}
+                               {user?.name || 'Your Name'}
                             </span>
                             <span className="text-xs text-gray-500">
                                {new Date().toLocaleDateString()}
