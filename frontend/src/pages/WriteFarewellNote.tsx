@@ -18,6 +18,7 @@ import { Send, Type, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { notesApi, diaryApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
+import type { PublicDiary } from '../types';
 
 export default function WriteFarewellNote() {
   const { link } = useParams<{ link: string }>();
@@ -30,7 +31,7 @@ export default function WriteFarewellNote() {
   // Fetch diary details for title
   const { data: diary } = useQuery({
     queryKey: ['diaryPublic', link],
-    queryFn: () => diaryApi.getByLink(link!).then(res => res.data.data),
+    queryFn: () => diaryApi.getByLink(link!).then(res => res.data.data as PublicDiary),
     enabled: !!link
   });
 

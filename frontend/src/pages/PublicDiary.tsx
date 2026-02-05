@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Heart, Shield, Lock, Edit, User, CheckCircle } from 'lucide-react';
 import { diaryApi, notesApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
+import type { PublicDiary as PublicDiaryType } from '../types';
 
 export default function PublicDiary() {
   const { link } = useParams<{ link: string }>();
@@ -28,7 +29,7 @@ export default function PublicDiary() {
     queryKey: ['publicDiary', link],
     queryFn: async () => {
       const res = await diaryApi.getByLink(link!);
-      return res.data.data;
+      return res.data.data as PublicDiaryType;
     },
   });
 

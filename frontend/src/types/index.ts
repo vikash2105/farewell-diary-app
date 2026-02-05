@@ -18,6 +18,14 @@ export interface Diary {
   updatedAt: string;
 }
 
+// Public diary response (what contributors see)
+export interface PublicDiary {
+  title: string;
+  description?: string;
+  isActive: boolean;
+  ownerName: string;
+}
+
 export interface DashboardDiary extends Pick<Diary, 'id' | 'title' | 'uniqueLink' | 'updatedAt'> {
   description: string | null;
   contributorCount: number;
