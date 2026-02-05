@@ -54,8 +54,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Homepage />} />
+          <Route path="/diary/:link" element={<PublicDiary />} />
+          <Route path="/write/:link" element={<WriteFarewellNote />} />
 
+          {/* Protected Routes */}
           <Route
             path="/dashboard"
             element={
@@ -73,8 +77,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          <Route path="/diary/:link" element={<PublicDiary />} />
           
           <Route
             path="/profile"
@@ -93,8 +95,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
-          <Route path="/diary/:link/write" element={<WriteFarewellNote />} />
+
+          {/* 404 Routes */}
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
