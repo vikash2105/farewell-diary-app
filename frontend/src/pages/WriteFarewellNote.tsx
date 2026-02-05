@@ -18,7 +18,6 @@ import { Send, Type, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { notesApi, diaryApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
-import type { PublicDiary } from '../types';
 
 export default function WriteFarewellNote() {
   const { link } = useParams<{ link: string }>();
@@ -28,12 +27,14 @@ export default function WriteFarewellNote() {
   const [content, setContent] = useState('');
   const [fontStyle, setFontStyle] = useState<'default' | 'handwriting' | 'serif' | 'cursive'>('default');
 
-  // Fetch diary details for title
-  const { data: diary } = useQuery({
+  // Type inference from API client - no casting needed
+  const { data: diaryResponse } = useQuery({
     queryKey: ['diaryPublic', link],
-    queryFn: () => diaryApi.getByLink(link!).then(res => res.data.data as PublicDiary),
-    enabled: !!link
+    queryFn: () => diaryApi.getByLink(link!),
+    enabled: !!link,
   });
+
+  const diary = diaryResponse?.data.data;
 
   /**
    * AUTH GATE: Redirect to login if not authenticated

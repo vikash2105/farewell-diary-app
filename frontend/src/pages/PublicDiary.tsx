@@ -18,20 +18,20 @@ import { useQuery } from '@tanstack/react-query';
 import { Heart, Shield, Lock, Edit, User, CheckCircle } from 'lucide-react';
 import { diaryApi, notesApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
-import type { PublicDiary as PublicDiaryType } from '../types';
 
 export default function PublicDiary() {
   const { link } = useParams<{ link: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
-  const { data: diaryData, isLoading } = useQuery({
+  // Type inference from API client - no casting needed
+  const { data: diaryResponse, isLoading } = useQuery({
     queryKey: ['publicDiary', link],
-    queryFn: async () => {
-      const res = await diaryApi.getByLink(link!);
-      return res.data.data as PublicDiaryType;
-    },
+    queryFn: () => diaryApi.getByLink(link!),
+    enabled: !!link,
   });
+
+  const diaryData = diaryResponse?.data.data;
 
   const { data: checkData } = useQuery({
     queryKey: ['checkNote', link],

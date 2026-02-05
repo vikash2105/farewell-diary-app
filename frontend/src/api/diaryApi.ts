@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 import type {
   Diary,
+  PublicDiary,
   DashboardDiary,
   FarewellNote,
   CreateDiaryDto,
@@ -35,10 +36,11 @@ export const diaryApi = {
     apiClient.get<ApiResponse<DashboardDiary[]>>('/diary'),
 
   /**
-   * Get public diary by link (write-only view)
+   * Get public diary by link (for contributors - returns minimal data)
+   * Returns PublicDiary with only: title, description, isActive, ownerName
    */
   getByLink: (link: string) =>
-    apiClient.get<ApiResponse<Diary>>(`/diary/${link}`),
+    apiClient.get<ApiResponse<PublicDiary>>(`/diary/${link}`),
 
   /**
    * Get notes for current user's diary (optionally for specific diary)
