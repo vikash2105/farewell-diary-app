@@ -57,8 +57,14 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<Homepage />} />
           <Route path="/diary/:link" element={<PublicDiary />} />
-          <Route path="/write/:link" element={<WriteFarewellNote />} />
-
+          <Route
+            path="/write/:link"
+            element={
+              <ProtectedRoute useGoogleRedirect>
+                <WriteFarewellNote />
+              </ProtectedRoute>
+            }
+          />
           {/* Protected Routes */}
           <Route
             path="/dashboard"
@@ -107,3 +113,4 @@ function App() {
 }
 
 export default App;
+

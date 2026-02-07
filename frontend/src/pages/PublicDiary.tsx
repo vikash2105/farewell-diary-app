@@ -17,6 +17,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Heart, Shield, Lock, Edit, User, CheckCircle } from 'lucide-react';
 import { diaryApi, notesApi } from '../api';
+import { authApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
 
 export default function PublicDiary() {
@@ -51,7 +52,16 @@ export default function PublicDiary() {
    * The WriteFarewellNote page will handle auth if needed
    */
   const handleWriteNote = () => {
-    navigate(`/write/${link}`);
+   if (!link) return;
+
+    const writePath = `/write/${link}`;
+
+    if (!isAuthenticated) {
+      authApi.loginWithGoogle(`${window.location.origin}${writePath}`);
+      return;
+    }
+
+    navigate(writePath);
   };
 
   if (isLoading) {
@@ -208,7 +218,7 @@ export default function PublicDiary() {
                     className="bg-primary-600 hover:bg-primary-700 text-white font-bold px-10 py-5 rounded-2xl transition-all duration-200 flex items-center gap-3 mx-auto shadow-xl hover:shadow-2xl transform hover:-translate-y-1 text-lg"
                   >
                     <Edit className="w-6 h-6" />
-                    Write Your Farewell Message
+                    Write a Farewell Message
                   </button>
                   <p className="text-sm text-gray-500 mt-4">
                     {isAuthenticated 

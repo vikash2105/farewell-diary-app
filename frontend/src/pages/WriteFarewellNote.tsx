@@ -2,7 +2,7 @@
  * WriteFarewellNote.tsx - Contribution Editor
  * 
  * Route: /write/:link
- * Access: Requires authentication
+ * Access: Requires authentication (enforced by ProtectedRoute)
  * 
  * Features:
  * - Font style selection
@@ -36,27 +36,7 @@ export default function WriteFarewellNote() {
 
   const diary = diaryResponse?.data.data;
 
-  /**
-   * AUTH GATE: Redirect to login if not authenticated
-   * This page requires authentication - redirect to Google OAuth if needed
-   */
-  useEffect(() => {
-    if (!link) return;
-    
-    if (!isAuthenticated) {
-      // User is not authenticated - redirect to Google OAuth
-      const currentUrl = window.location.href;
-      const callbackUrl = encodeURIComponent(currentUrl);
-      const authUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/google?callbackUrl=${callbackUrl}`;
-      
-      toast.info('Please sign in to write your farewell note');
-      
-      setTimeout(() => {
-        window.location.href = authUrl;
-      }, 1000);
-    }
-  }, [isAuthenticated, link]);
-
+  
   // Load saved draft (only for authenticated users)
   useEffect(() => {
     if (!link || !isAuthenticated) return;

@@ -27,7 +27,7 @@ export const authApi = {
    * 
    * @example
    * // Custom callback - redirect to specific page
-   * authApi.loginWithGoogle(`${window.location.origin}/diary/${link}/write`);
+   * authApi.loginWithGoogle(`${window.location.origin}/write/${link}`);
    */
   loginWithGoogle: (callbackUrl?: string) => {
     const baseUrl = getBaseUrl();
