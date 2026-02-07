@@ -33,12 +33,16 @@ apiClient.interceptors.response.use(
     // Only handle 401 errors
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
-      const isAuthRoute = currentPath.startsWith('/auth') || 
-                         currentPath === '/dashboard' ||
-                         currentPath === '/';
-      
-      // Don't redirect if already on auth-related route or homepage
-      if (!isAuthRoute) {
+      const requiresAuth =
+        currentPath.startsWith('/dashboard') ||
+        currentPath.startsWith('/create') ||
+        currentPath.startsWith('/profile') ||
+        currentPath.startsWith('/notes') ||
+        currentPath.startsWith('/write');
+
+      // Redirect only when the user is on an authenticated route.
+      // Public routes (/, /diary/:link) should never force OAuth on a 401.
+      if (requiresAuth) {
         // Save current location for post-login redirect
         sessionStorage.setItem('auth_redirect_after_login', currentPath);
         
