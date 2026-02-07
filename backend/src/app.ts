@@ -34,7 +34,8 @@ export const createApp = (): Application => {
 
   // 🔥 CORS HARDENED FOR PRODUCTION
   const allowedOrigins = [
-    "https://farewell-diary-app.vercel.app",
+    "https://farewelldiary.in",
+    "https://www.farewelldiary.in",
     "http://localhost:5173",
     "http://localhost:3000"
   ];
