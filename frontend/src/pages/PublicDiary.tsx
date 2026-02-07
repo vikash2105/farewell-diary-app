@@ -147,6 +147,18 @@ export default function PublicDiary() {
                 <p className="text-green-800">
                   You've already written a farewell note for this diary.
                 </p>
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 text-center">
+                <CheckCircle className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <p className="text-blue-800 mb-6">
+                  Visit your dashboard to create your own farewell messages.
+                </p>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl transition-colors shadow-lg"
+                >
+                  Go to Dashboard
+                </button>
+              </div>
               </div>
             ) : (
               /* Contributor Call to Action */
