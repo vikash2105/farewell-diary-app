@@ -1,5 +1,11 @@
 // frontend/src/api/client.ts
 import axios from 'axios';
+import {
+  getCurrentRoute,
+  isProtectedRoute,
+  rememberAuthReturnUrl,
+  toAbsoluteFrontendUrl,
+} from '../utils/authRedirect';
 
 /**
  * IMPORTANT:
@@ -32,22 +38,13 @@ apiClient.interceptors.response.use(
   (error) => {
     // Only handle 401 errors
     if (error.response?.status === 401) {
-      const currentPath = window.location.pathname;
-      const requiresAuth =
-        currentPath.startsWith('/dashboard') ||
-        currentPath.startsWith('/create') ||
-        currentPath.startsWith('/profile') ||
-        currentPath.startsWith('/notes') ||
-        currentPath.startsWith('/write');
+      const currentRoute = getCurrentRoute();
 
       // Redirect only when the user is on an authenticated route.
       // Public routes (/, /diary/:link) should never force OAuth on a 401.
-      if (requiresAuth) {
-        // Save current location for post-login redirect
-        sessionStorage.setItem('auth_redirect_after_login', currentPath);
-        
-        // Construct callback URL for OAuth
-        const callbackUrl = encodeURIComponent(`${window.location.origin}${currentPath}`);
+      if (isProtectedRoute(currentRoute)) {
+        rememberAuthReturnUrl(currentRoute);
+        const callbackUrl = encodeURIComponent(toAbsoluteFrontendUrl(currentRoute));
         
         // Redirect to Google OAuth with callback
         window.location.href = `${BASE_URL}/api/v1/auth/google?callbackUrl=${callbackUrl}`;

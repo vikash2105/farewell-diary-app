@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Heart, Shield, Lock, Edit, User, CheckCircle } from 'lucide-react';
 import { diaryApi, notesApi, authApi } from '../api';
 import { useAuthStore } from '../stores/authStore';
+import { rememberAuthReturnUrl, toAbsoluteFrontendUrl } from '../utils/authRedirect';
 
 export default function PublicDiary() {
   const { link } = useParams<{ link: string }>();
@@ -38,7 +39,8 @@ export default function PublicDiary() {
     const writePath = `/write/${link}`;
 
     if (!isAuthenticated) {
-      authApi.loginWithGoogle(`${window.location.origin}${writePath}`);
+      rememberAuthReturnUrl(writePath);
+      authApi.loginWithGoogle(toAbsoluteFrontendUrl(writePath));
       return;
     }
 

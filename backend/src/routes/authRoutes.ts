@@ -23,18 +23,35 @@ const getSafeRedirectUrl = (callbackUrl?: string): string => {
     return `${FRONTEND_URL}/dashboard`;
   }
 };
+
 router.get(
   '/google',
   (req: Request, res: Response, next) => {
-     const callbackUrl = req.query.callbackUrl as string | undefined;
- if (callbackUrl && req.session) {
-   req.session.oauthCallbackUrl = getSafeRedirectUrl(callbackUrl);
+    const callbackUrl =
+      typeof req.query.callbackUrl === 'string'
+        ? req.query.callbackUrl
+        : undefined;
+    const authenticate = () =>
+      passport.authenticate('google', { scope: ['profile', 'email'] })(
+        req,
+        res,
+        next
+      );
+
+    if (callbackUrl && req.session) {
+      req.session.oauthCallbackUrl = getSafeRedirectUrl(callbackUrl);
+      req.session.save((error) => {
+        if (error) {
+          next(error);
+          return;
+        }
+
+        authenticate();
+      });
+      return;
     }
-     passport.authenticate('google', { scope: ['profile', 'email'] })(
-      req,
-      res,
-      next
-    );
+
+    authenticate();
   }
 );
 router.get(

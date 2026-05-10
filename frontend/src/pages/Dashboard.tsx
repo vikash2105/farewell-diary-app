@@ -21,6 +21,7 @@ import FloatingActionButton from '../components/dashboard/FloatingActionButton';
 import { diaryApi } from '../api';
 import { DashboardDiary } from '../types';
 import { useAuthStore } from '../stores/authStore';
+import { consumeAuthReturnUrl } from '../utils/authRedirect';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -35,10 +36,9 @@ export default function Dashboard() {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check for auth redirect
-    const returnUrl = sessionStorage.getItem('auth_return_url');
-    if (returnUrl) {
-      sessionStorage.removeItem('auth_return_url');
+    // Fallback for OAuth providers/browsers that drop the server-side callback session.
+    const returnUrl = consumeAuthReturnUrl();
+    if (returnUrl && returnUrl !== '/dashboard') {
       navigate(returnUrl, { replace: true });
       return;
     }

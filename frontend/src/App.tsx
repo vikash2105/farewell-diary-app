@@ -60,7 +60,7 @@ function App() {
           <Route
             path="/write/:link"
             element={
-              <ProtectedRoute useGoogleRedirect>
+              <ProtectedRoute>
                 <WriteFarewellNote />
               </ProtectedRoute>
             }
@@ -113,4 +113,3 @@ function App() {
 }
 
 export default App;
-
