@@ -1,4 +1,4 @@
-import { customAlphabet } from 'nanoid';
+import { randomInt } from 'node:crypto';
 
 /**
  * Generates a unique, URL-friendly link
@@ -6,7 +6,13 @@ import { customAlphabet } from 'nanoid';
 export const generateUniqueLink = (length = 12): string => {
   const alphabet =
     '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-  return customAlphabet(alphabet, length)();
+  let link = '';
+
+  for (let i = 0; i < length; i += 1) {
+    link += alphabet[randomInt(alphabet.length)];
+  }
+
+  return link;
 };
 
 /**

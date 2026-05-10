@@ -3,6 +3,8 @@ import { DiaryService } from "../services/diaryService";
 import { FarewellNoteService } from "../services/farewellNoteService";
 import { ApiError } from "../middleware/errorHandler";
 import { db } from "../db";
+import { users } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 export class DiaryController {
   static async createDiary(req: Request, res: Response): Promise<void> {
@@ -85,12 +87,11 @@ export class DiaryController {
     const diary = await DiaryService.validateAccess(req.params.link);
 
     // Fetch owner name for trust-building context
-    const owner = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, diary.userId),
-      columns: {
-        name: true,
-      },
-    });
+    const [owner] = await db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, diary.userId))
+      .limit(1);
 
     // ✅ Return minimal data for public contributors
     // Include owner name to build trust and context
