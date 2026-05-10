@@ -1,15 +1,14 @@
-// frontend/src/pages/Homepage.tsx
 import { useNavigate } from 'react-router-dom';
-import { Heart } from 'lucide-react';
-import { useAuthStore } from '../stores/authStore';
+import { BookOpen, Heart, Home, Menu, PenLine, User } from 'lucide-react';
 import { authApi } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
+import { useAuthStore } from '../stores/authStore';
 
-// Sections
-import HeroSection from '../components/homepage/HeroSection';
-import FeaturesSection from '../components/homepage/FeaturesSection';
-import TestimonialsSection from '../components/homepage/TestimonialsSection';
-import SupportersSection from '../components/homepage/SupportersSection';
 import DonationSection from '../components/homepage/DonationSection';
+import FeaturesSection from '../components/homepage/FeaturesSection';
+import HeroSection from '../components/homepage/HeroSection';
+import SupportersSection from '../components/homepage/SupportersSection';
+import TestimonialsSection from '../components/homepage/TestimonialsSection';
 
 export default function Homepage() {
   const { isAuthenticated } = useAuthStore();
@@ -18,11 +17,10 @@ export default function Homepage() {
   const handleGetStarted = () => {
     if (isAuthenticated) {
       navigate('/dashboard');
-    } else {
-      // After login, redirect to dashboard
-      const callbackUrl = `${window.location.origin}/dashboard`;
-      authApi.loginWithGoogle(callbackUrl);
+      return;
     }
+
+    authApi.loginWithGoogle(`${window.location.origin}/dashboard`);
   };
 
   const scrollToBottom = () => {
@@ -30,74 +28,98 @@ export default function Homepage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-secondary-50 to-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-secondary-200 shadow-sm">
-        <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Heart className="w-8 h-8 text-primary-600" fill="currentColor" />
-            <span className="text-2xl font-bold text-primary-600">
+    <div className="site-shell overflow-x-hidden pb-24 md:pb-0">
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 shadow-sm backdrop-blur-xl">
+        <nav className="page-container flex h-16 items-center justify-between">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2"
+            aria-label="Go to homepage"
+          >
+            <Heart className="h-7 w-7 text-primary" fill="currentColor" />
+            <span className="brand-script text-3xl font-bold text-primary">
               Farewell Diary
             </span>
-          </div>
+          </button>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-7 md:flex">
+            <button
+              onClick={() => document.getElementById('memories')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm font-bold text-primary"
+            >
+              Memories
+            </button>
+            <button
+              onClick={() => document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm font-semibold text-muted-foreground transition hover:text-primary"
+            >
+              Letters
+            </button>
             <button
               onClick={scrollToBottom}
-              className="hidden md:block text-secondary-600 hover:text-primary-600 transition-colors"
+              className="text-sm font-semibold text-muted-foreground transition hover:text-primary"
             >
               Support Us
             </button>
+          </div>
 
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             <button
               onClick={handleGetStarted}
-              className="btn btn-primary"
+              className="btn btn-primary hidden sm:inline-flex"
             >
-              {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
+              {isAuthenticated ? 'Dashboard' : 'Create Diary'}
+            </button>
+            <button className="btn btn-secondary h-11 w-11 px-0 md:hidden" aria-label="Open menu">
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </nav>
       </header>
 
-      {/* Sections */}
       <HeroSection />
       <FeaturesSection />
       <TestimonialsSection />
       <SupportersSection />
       <DonationSection />
 
-      {/* Footer */}
-      <footer className="py-12 px-4 bg-secondary-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
+      <footer className="border-t border-border/60 bg-[hsl(var(--surface-container))] py-12 text-foreground">
+        <div className="page-container">
+          <div className="grid gap-8 md:grid-cols-3">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Heart className="w-6 h-6 text-primary-400" fill="currentColor" />
-                <span className="text-xl font-bold">Farewell Diary</span>
+              <div className="mb-4 flex items-center gap-2">
+                <Heart className="h-6 w-6 text-primary" fill="currentColor" />
+                <span className="brand-script text-3xl font-bold text-primary">
+                  Farewell Diary
+                </span>
               </div>
-              <p className="text-secondary-400">
+              <p className="max-w-sm text-muted-foreground">
                 A private, secure place to preserve the farewell messages that matter most.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-secondary-400">
+              <h3 className="mb-4 font-bold">Product</h3>
+              <ul className="space-y-2 text-muted-foreground">
                 <li>
-                  <button
-                    onClick={handleGetStarted}
-                    className="hover:text-white transition-colors"
-                  >
+                  <button onClick={handleGetStarted} className="transition-colors hover:text-primary">
                     Create Diary
                   </button>
                 </li>
                 <li>
-                  <button className="hover:text-white transition-colors">
+                  <button
+                    onClick={() => document.getElementById('memories')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="transition-colors hover:text-primary"
+                  >
                     How It Works
                   </button>
                 </li>
                 <li>
-                  <button className="hover:text-white transition-colors">
+                  <button
+                    onClick={() => document.getElementById('memories')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="transition-colors hover:text-primary"
+                  >
                     Privacy & Security
                   </button>
                 </li>
@@ -105,21 +127,15 @@ export default function Homepage() {
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-secondary-400">
+              <h3 className="mb-4 font-bold">Support</h3>
+              <ul className="space-y-2 text-muted-foreground">
                 <li>
-                  <button
-                    onClick={scrollToBottom}
-                    className="hover:text-white transition-colors"
-                  >
+                  <button onClick={scrollToBottom} className="transition-colors hover:text-primary">
                     Donate
                   </button>
                 </li>
                 <li>
-                  <a
-                    href="mailto:support@farewelldiary.com"
-                    className="hover:text-white transition-colors"
-                  >
+                  <a href="mailto:support@farewelldiary.com" className="transition-colors hover:text-primary">
                     Contact
                   </a>
                 </li>
@@ -127,14 +143,40 @@ export default function Homepage() {
             </div>
           </div>
 
-          <div className="border-t border-secondary-700 pt-8 text-center text-secondary-400">
-            <p>&copy; 2026 Farewell Diary. Made with ❤️ for preserving precious memories.</p>
-            <p className="text-sm mt-2">
+          <div className="mt-8 border-t border-border/70 pt-8 text-center text-sm text-muted-foreground">
+            <p>&copy; 2026 Farewell Diary. Preserving legacies with grace.</p>
+            <p className="mt-2">
               Independently built and maintained. No ads, no tracking, just care.
             </p>
           </div>
         </div>
       </footer>
+
+      <div className="fixed bottom-0 z-50 w-full border-t border-border/60 bg-background/90 shadow-[0_-8px_24px_hsl(320_8%_10%/0.08)] backdrop-blur-xl md:hidden">
+        <div className="grid h-20 grid-cols-4 px-4 text-xs font-bold text-muted-foreground">
+          <button className="flex flex-col items-center justify-center gap-1 text-primary">
+            <span className="rounded-full bg-primary/12 p-2">
+              <Home className="h-5 w-5" />
+            </span>
+            Home
+          </button>
+          <button onClick={handleGetStarted} className="flex flex-col items-center justify-center gap-1">
+            <PenLine className="h-5 w-5" />
+            Write
+          </button>
+          <button
+            onClick={() => document.getElementById('memories')?.scrollIntoView({ behavior: 'smooth' })}
+            className="flex flex-col items-center justify-center gap-1"
+          >
+            <BookOpen className="h-5 w-5" />
+            Journal
+          </button>
+          <button onClick={handleGetStarted} className="flex flex-col items-center justify-center gap-1">
+            <User className="h-5 w-5" />
+            Profile
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

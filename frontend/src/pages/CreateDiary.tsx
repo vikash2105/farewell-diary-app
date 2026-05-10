@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { Heart, ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Heart, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { diaryApi } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function CreateDiary() {
   const navigate = useNavigate();
@@ -22,8 +23,8 @@ export default function CreateDiary() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     if (title.trim().length < 3) {
       toast.error('Title must be at least 3 characters');
       return;
@@ -32,118 +33,91 @@ export default function CreateDiary() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 via-primary-50 to-secondary-50">
-      {/* Header */}
-      <header className="bg-white border-b border-secondary-200 shadow-sm">
-        <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Heart className="w-8 h-8 text-primary-600" fill="currentColor" />
-            <span className="text-2xl font-bold text-primary-600">Farewell Diary</span>
+    <div className="site-shell">
+      <header className="border-b border-border/60 bg-background/90 shadow-sm backdrop-blur-xl">
+        <nav className="page-container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Heart className="h-7 w-7 text-primary" fill="currentColor" />
+            <span className="brand-script text-3xl font-bold text-primary">Farewell Diary</span>
           </div>
 
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="hidden md:inline">Back</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary">
+              <ArrowLeft className="h-5 w-5" />
+              <span className="hidden md:inline">Back</span>
+            </button>
+          </div>
         </nav>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-          {/* Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
-              <Sparkles className="w-10 h-10 text-primary-600" />
+      <main className="page-container py-12">
+        <div className="sanctuary-card mx-auto max-w-3xl p-8 md:p-12">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+              <Sparkles className="h-10 w-10 text-primary" />
             </div>
-          </div>
-
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-secondary-900 mb-3">
+            <h1 className="brand-script mb-3 text-5xl font-bold text-primary">
               Create Your Farewell Diary
             </h1>
-            <p className="text-secondary-600 text-lg">
-              A safe space to collect heartfelt messages from your loved ones
+            <p className="text-lg text-muted-foreground">
+              A safe space to collect heartfelt messages from your loved ones.
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-secondary-700 mb-2">
-                Diary Title <span className="text-red-500">*</span>
+              <label className="mb-2 block text-sm font-bold text-muted-foreground">
+                Diary Title <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-3 border border-secondary-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                onChange={(event) => setTitle(event.target.value)}
+                className="input"
                 placeholder="e.g., My Farewell Journey"
                 required
                 minLength={3}
                 maxLength={255}
               />
-              <p className="text-xs text-secondary-500 mt-1">
-                Choose a meaningful title (3-255 characters)
+              <p className="mt-2 text-xs text-muted-foreground">
+                Choose a meaningful title, between 3 and 255 characters.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-secondary-700 mb-2">
-                Description (Optional)
+              <label className="mb-2 block text-sm font-bold text-muted-foreground">
+                Description
               </label>
               <textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-3 border border-secondary-300 rounded-xl h-32 resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                onChange={(event) => setDescription(event.target.value)}
+                className="textarea h-32"
                 placeholder="A brief description of what this diary means to you..."
                 maxLength={1000}
               />
-              <p className="text-xs text-secondary-500 mt-1">
-                Help contributors understand the purpose of your diary
-              </p>
             </div>
 
-            {/* Info Box */}
-            <div className="bg-primary-50 border border-primary-200 rounded-xl p-4">
-              <h3 className="font-semibold text-primary-900 mb-2">What happens next?</h3>
-              <ul className="space-y-2 text-sm text-primary-800">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary-600 mt-0.5">✓</span>
-                  <span>You'll get a unique shareable link</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary-600 mt-0.5">✓</span>
-                  <span>Friends and family can write you farewell notes</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary-600 mt-0.5">✓</span>
-                  <span>Only you can read the messages - they're encrypted</span>
-                </li>
+            <div className="rounded-xl border border-primary/20 bg-primary/10 p-5">
+              <h2 className="mb-3 font-bold text-primary">What happens next?</h2>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>You'll get a unique shareable link.</li>
+                <li>Friends and family can write private farewell notes.</li>
+                <li>Only you can read the collected messages.</li>
               </ul>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-secondary-300 text-white font-semibold py-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:transform-none"
+              className="btn btn-primary w-full py-4 text-base"
             >
               {createMutation.isPending ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Creating...
-                </span>
+                <span className="h-5 w-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
               ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  Create My Diary
-                </span>
+                <Sparkles className="h-5 w-5" />
               )}
+              {createMutation.isPending ? 'Creating...' : 'Create My Diary'}
             </button>
           </form>
         </div>

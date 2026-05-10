@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { useEffect } from 'react';
 import { authApi } from './api';
 import { useAuthStore } from './stores/authStore';
+import { applySavedTheme } from './components/ThemeToggle';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -32,6 +33,8 @@ function App() {
   const { setUser, setLoading, isLoading } = useAuthStore();
 
   useEffect(() => {
+    applySavedTheme();
+
     const loadUser = async () => {
       try {
         const response = await authApi.getCurrentUser();

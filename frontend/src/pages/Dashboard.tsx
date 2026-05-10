@@ -23,6 +23,7 @@ import { authApi, diaryApi } from '../api';
 import { DashboardDiary } from '../types';
 import { useAuthStore } from '../stores/authStore';
 import { consumeAuthReturnUrl } from '../utils/authRedirect';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -140,37 +141,36 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 via-primary-50 to-secondary-50">
-      {/* Header */}
-      <header className="bg-white border-b border-secondary-200 shadow-sm sticky top-0 z-40">
-        <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          {/* Logo */}
+    <div className="site-shell">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 shadow-sm backdrop-blur-xl">
+        <nav className="page-container flex h-16 items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Heart className="w-8 h-8 text-primary-600" fill="currentColor" />
-            <span className="text-2xl font-bold text-primary-600">
+            <Heart className="h-7 w-7 text-primary" fill="currentColor" />
+            <span className="brand-script text-3xl font-bold text-primary">
               Farewell Diary
             </span>
           </div>
 
-          {/* Profile Dropdown */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
           <div ref={profileRef} className="relative">
             <button
               onClick={() => setProfileOpen((prev) => !prev)}
-              className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors"
+              className="btn btn-secondary"
             >
-              <User className="w-5 h-5" />
+              <User className="h-5 w-5" />
               <span className="hidden md:inline">Profile</span>
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="h-4 w-4" />
             </button>
 
             {profileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-secondary-200 z-50 overflow-hidden">
+              <div className="sanctuary-card absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl p-1">
                 <button
                   onClick={() => {
                     navigate('/profile');
                     setProfileOpen(false);
                   }}
-                  className="w-full px-4 py-3 flex items-center gap-3 text-secondary-700 hover:bg-secondary-50 transition"
+                  className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-foreground transition hover:bg-muted"
                 >
                   <Settings className="w-4 h-4" />
                   Account Settings
@@ -178,7 +178,7 @@ export default function Dashboard() {
 
                 <button
                   onClick={handleLogout}
-                  className="w-full px-4 py-3 flex items-center gap-3 text-red-600 hover:bg-red-50 transition"
+                  className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-destructive transition hover:bg-destructive/10"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
@@ -186,24 +186,23 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+          </div>
         </nav>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header Section */}
+      <main className="page-container py-8">
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-secondary-900 mb-2">
+              <h1 className="brand-script mb-2 text-5xl font-bold text-primary">
                 My Collection
                 {diaries.length > 0 && (
-                  <span className="ml-3 text-lg text-secondary-500 font-normal">
+                  <span className="ml-3 align-middle text-lg font-bold text-muted-foreground">
                     {diaries.length}
                   </span>
                 )}
               </h1>
-              <p className="text-secondary-600">
+              <p className="text-muted-foreground">
                 Your collection of precious memories and farewell messages
               </p>
             </div>
@@ -221,20 +220,20 @@ export default function Dashboard() {
         {/* Empty State */}
         {!loading && diaries.length === 0 && (
           <div className="text-center py-16">
-            <div className="bg-white rounded-3xl shadow-xl p-12 max-w-2xl mx-auto">
-              <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Heart className="w-12 h-12 text-primary-600" fill="currentColor" />
+            <div className="sanctuary-card mx-auto max-w-2xl p-12">
+              <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+                <Heart className="h-12 w-12 text-primary" fill="currentColor" />
               </div>
-              <h2 className="text-2xl font-bold text-secondary-900 mb-3">
+              <h2 className="brand-script mb-3 text-4xl font-bold text-primary">
                 Create Your First Diary
               </h2>
-              <p className="text-secondary-600 mb-8">
+              <p className="mb-8 text-muted-foreground">
                 Start collecting heartfelt farewell messages from your loved
                 ones
               </p>
               <button
                 onClick={() => navigate('/create')}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-xl inline-flex items-center gap-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                className="btn btn-primary px-8"
               >
                 <Plus className="w-5 h-5" />
                 Create Diary

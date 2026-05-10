@@ -1,125 +1,146 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, MessageCircle, Share2, ExternalLink } from "lucide-react";
-import { diaryApi } from "../api";
-import { FarewellNote, Diary } from "../types";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, ExternalLink, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { diaryApi } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
+import { Diary, FarewellNote } from '../types';
 
 export default function ViewNotes() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const diaryId = searchParams.get('diaryId') || undefined;
-  
+
   const [notes, setNotes] = useState<FarewellNote[]>([]);
   const [diary, setDiary] = useState<Diary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    diaryApi.getMyNotes(diaryId)
+    diaryApi
+      .getMyNotes(diaryId)
       .then((res) => {
-          if (res.data.data) {
-             setNotes(res.data.data.notes);
-             if (res.data.data.diary) {
-                setDiary(res.data.data.diary);
-             }
-          }
+        if (res.data.data) {
+          setNotes(res.data.data.notes);
+          if (res.data.data.diary) setDiary(res.data.data.diary);
+        }
       })
       .catch((error) => {
         console.error(error);
-        toast.error("Failed to load notes");
+        toast.error('Failed to load notes');
       })
       .finally(() => setLoading(false));
   }, [diaryId]);
 
   const copyLink = () => {
     if (!diary) return;
-    const url = `${window.location.origin}/diary/${diary.uniqueLink}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Link copied to clipboard!");
+    navigator.clipboard.writeText(`${window.location.origin}/diary/${diary.uniqueLink}`);
+    toast.success('Link copied to clipboard!');
   };
 
   const openPublic = () => {
-      if (!diary) return;
-      window.open(`/diary/${diary.uniqueLink}`, '_blank');
+    if (!diary) return;
+    window.open(`/diary/${diary.uniqueLink}`, '_blank');
   };
 
   const getFontClass = (style: string) => {
     switch (style) {
-      case 'handwriting': return 'font-handwriting';
-      case 'serif': return 'font-serif';
-      case 'cursive': return 'font-cursive';
-      default: return 'font-sans';
+      case 'handwriting':
+        return 'font-handwriting';
+      case 'serif':
+        return 'font-serif';
+      case 'cursive':
+        return 'font-cursive';
+      default:
+        return 'font-default';
     }
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="site-shell flex items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-            <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-gray-200 rounded-full transition-colors mb-4 inline-flex items-center gap-2 text-gray-600">
-                <ArrowLeft className="w-5 h-5" /> Back to Dashboard
+    <div className="site-shell">
+      <header className="border-b border-border/60 bg-background/90 shadow-sm backdrop-blur-xl">
+        <nav className="page-container flex h-16 items-center justify-between">
+          <button onClick={() => navigate('/dashboard')} className="btn btn-ghost px-3">
+            <ArrowLeft className="h-5 w-5" />
+            Dashboard
+          </button>
+          <div className="flex items-center gap-2">
+            <Heart className="h-7 w-7 text-primary" fill="currentColor" />
+            <span className="brand-script hidden text-3xl font-bold text-primary sm:inline">
+              Farewell Diary
+            </span>
+          </div>
+          <ThemeToggle />
+        </nav>
+      </header>
+
+      <main className="page-container py-8">
+        <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+          <div>
+            <h1 className="brand-script text-5xl font-bold text-primary">
+              {diary?.title || 'My Farewell Notes'}
+            </h1>
+            {diary?.description && (
+              <p className="mt-2 max-w-2xl text-muted-foreground">{diary.description}</p>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={copyLink} className="btn btn-secondary">
+              <Share2 className="h-4 w-4" />
+              Copy Link
             </button>
-            
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                     <h1 className="text-3xl font-bold text-gray-900">{diary?.title || 'My Farewell Notes'}</h1>
-                     {diary?.description && <p className="text-gray-600 mt-2">{diary.description}</p>}
-                </div>
-                <div className="flex gap-2">
-                    <button onClick={copyLink} className="btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                        <Share2 className="w-4 h-4"/> Copy Link
-                    </button>
-                    <button onClick={openPublic} className="btn bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                        <ExternalLink className="w-4 h-4"/> View Public
-                    </button>
-                </div>
-            </div>
+            <button onClick={openPublic} className="btn btn-secondary">
+              <ExternalLink className="h-4 w-4" />
+              View Public
+            </button>
+          </div>
         </div>
-        
+
         {notes.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="w-8 h-8 text-gray-400"/>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">No notes yet</h3>
-                <p className="text-gray-500 mb-6">Share your diary link to receive farewell messages.</p>
-                <button onClick={copyLink} className="btn btn-primary">
-                    Copy Share Link
-                </button>
+          <div className="sanctuary-card py-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <MessageCircle className="h-8 w-8 text-muted-foreground" />
             </div>
+            <h2 className="mb-1 text-lg font-bold">No notes yet</h2>
+            <p className="mb-6 text-muted-foreground">Share your diary link to receive farewell messages.</p>
+            <button onClick={copyLink} className="btn btn-primary">
+              Copy Share Link
+            </button>
+          </div>
         ) : (
-            <div className="grid gap-6">
-            {notes.map((n) => (
-                <div key={n.id} className={`p-8 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow ${getFontClass(n.fontStyle)}`}>
-                    <p className="text-xl mb-6 whitespace-pre-wrap text-gray-800 leading-relaxed">{n.content}</p>
-                    <div className="flex items-center justify-between pt-6 border-t border-gray-50 text-sm text-gray-500 font-sans">
-                        <div className="flex items-center gap-2">
-                           <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
-                              {n.authorName.charAt(0).toUpperCase()}
-                           </div>
-                           <span className="font-medium">
-                              {n.authorName}
-                           </span>
-                        </div>
-                        <time dateTime={n.createdAt}>
-                          {new Date(n.createdAt).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </time>
+          <div className="grid gap-6">
+            {notes.map((note) => (
+              <article key={note.id} className="sanctuary-card p-8">
+                <p className={`note-content mb-6 whitespace-pre-wrap text-foreground ${getFontClass(note.fontStyle)}`}>
+                  {note.content}
+                </p>
+                <div className="flex items-center justify-between border-t border-border/60 pt-6 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
+                      {note.authorName.charAt(0).toUpperCase()}
                     </div>
+                    <span className="font-bold text-foreground">{note.authorName}</span>
+                  </div>
+                  <time dateTime={note.createdAt}>
+                    {new Date(note.createdAt).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
                 </div>
+              </article>
             ))}
-            </div>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

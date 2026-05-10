@@ -9,6 +9,7 @@ import { ArrowLeft } from 'lucide-react';
 import AvatarUpload from '../components/profile/AvatarUpload';
 import ProfileForm from '../components/profile/ProfileForm';
 import { userApi } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -65,17 +66,17 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="site-shell flex items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 flex items-center justify-center">
+      <div className="site-shell flex items-center justify-center">
         <div className="text-center">
-          <p className="text-secondary-600 mb-4">Failed to load profile</p>
+          <p className="mb-4 text-muted-foreground">Failed to load profile</p>
           <button onClick={() => navigate('/dashboard')} className="btn btn-primary">
             Back to Dashboard
           </button>
@@ -85,26 +86,23 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50">
-      {/* Header */}
-      <div className="bg-white border-b border-secondary-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+    <div className="site-shell">
+      <div className="border-b border-border/60 bg-background/90 shadow-sm backdrop-blur-xl">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors"
+            className="btn btn-ghost px-3"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Diary</span>
           </button>
+          <ThemeToggle />
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Profile Card */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+        <div className="sanctuary-card mb-8 p-8">
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Left: Avatar */}
             <div className="md:w-1/3 flex flex-col items-center">
               <AvatarUpload
                 currentAvatar={profile.profilePicture}
@@ -113,8 +111,8 @@ export default function Profile() {
               />
             </div>
 
-            {/* Right: Form */}
             <div className="md:w-2/3">
+              <h1 className="brand-script mb-6 text-5xl font-bold text-primary">Your Profile</h1>
               <ProfileForm
                 initialData={{
                   name: profile.name,
@@ -127,19 +125,18 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Account Info Card (Optional) */}
-        <div className="bg-white rounded-3xl shadow-xl p-8">
-          <h3 className="text-lg font-semibold text-secondary-900 mb-4">
+        <div className="sanctuary-card p-8">
+          <h3 className="text-lg font-bold text-foreground mb-4">
             Account Information
           </h3>
           <div className="space-y-3">
             <div>
-              <span className="text-sm text-secondary-500">Email</span>
-              <p className="text-secondary-900">{profile.email}</p>
+              <span className="text-sm text-muted-foreground">Email</span>
+              <p className="text-foreground">{profile.email}</p>
             </div>
             <div>
-              <span className="text-sm text-secondary-500">Member since</span>
-              <p className="text-secondary-900">
+              <span className="text-sm text-muted-foreground">Member since</span>
+              <p className="text-foreground">
                 {new Date(profile.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, DollarSign } from 'lucide-react';
+import { DollarSign, Heart, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function DonationSection() {
@@ -13,176 +13,123 @@ export default function DonationSection() {
 
   const handleDonate = async () => {
     const finalAmount = amount === 'custom' ? customAmount : amount;
-    
+
     if (!finalAmount || parseFloat(finalAmount) <= 0) {
       toast.error('Please enter a valid amount');
       return;
     }
 
-    if (!isAnonymous && !displayName) {
+    if (!isAnonymous && !displayName.trim()) {
       toast.error('Please enter your name or choose anonymous');
       return;
     }
 
-    // Here you would integrate with Stripe/Razorpay
-    // For now, we'll just show a toast
-    toast.info('Payment integration coming soon!', {
-      description: 'This feature will be available in the next update.',
+    toast.info('Payment integration coming soon.', {
+      description: 'This donation form is ready for Stripe or Razorpay integration.',
     });
-
-    // Example of what the integration would look like:
-    /*
-    try {
-      // 1. Create payment intent with Stripe/Razorpay
-      const paymentIntent = await createPaymentIntent({
-        amount: parseFloat(finalAmount),
-      });
-
-      // 2. After successful payment, record donation
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/public/donations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          displayName: isAnonymous ? 'Anonymous' : displayName,
-          amount: `$${finalAmount}`,
-          message: message || null,
-          isAnonymous,
-          paymentProvider: 'stripe',
-          transactionId: paymentIntent.id,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('Thank you for your support!');
-        // Reset form
-      }
-    } catch (error) {
-      toast.error('Payment failed. Please try again.');
-    }
-    */
   };
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-primary-50 to-white">
-      <div className="max-w-4xl mx-auto">
-        <div className="card p-8 md:p-12">
-          <div className="text-center mb-8">
-            <Heart className="w-16 h-16 text-primary-600 mx-auto mb-4" fill="currentColor" />
-            <h2 className="text-4xl font-bold mb-4">Support Farewell Diary</h2>
-            <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
-              Help keep Farewell Diary ad-free and scalable as an independent project. 
-              Your support helps us maintain this safe space for preserving precious memories.
-            </p>
-          </div>
+    <section className="donate-section py-20">
+      <div className="page-container grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+        <div className="lg:sticky lg:top-24">
+          <span className="section-kicker mb-5">Donation form</span>
+          <h2 className="brand-script text-5xl font-bold text-primary">
+            Help keep the sanctuary open.
+          </h2>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
+            Every contribution supports a quieter, safer web experience for people
+            preserving memories, notes, and final words.
+          </p>
+        </div>
 
-          <div className="space-y-6">
-            {/* Amount Selection */}
+        <div className="sanctuary-card relative overflow-hidden p-6 md:p-10">
+          <Heart className="absolute -right-8 -top-8 h-36 w-36 text-primary/5" fill="currentColor" />
+          <div className="relative space-y-6">
             <div>
-              <label className="block text-sm font-semibold mb-3 text-secondary-700">
+              <label className="mb-3 block text-sm font-bold text-muted-foreground">
                 Choose Amount
               </label>
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mb-3">
+              <div className="grid grid-cols-3 gap-3 md:grid-cols-5">
                 {presetAmounts.map((preset) => (
                   <button
                     key={preset}
+                    type="button"
                     onClick={() => setAmount(preset)}
-                    className={`py-3 rounded-lg border-2 font-semibold transition-all ${
+                    className={`rounded-full border px-4 py-3 font-extrabold transition ${
                       amount === preset
-                        ? 'border-primary-600 bg-primary-50 text-primary-700'
-                        : 'border-secondary-200 hover:border-primary-300'
+                        ? 'border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                        : 'border-border bg-background/60 text-foreground hover:border-primary/50'
                     }`}
                   >
                     ${preset}
                   </button>
                 ))}
               </div>
-              
-              <div className="flex items-center gap-3">
+
+              <div className="mt-3 flex items-center gap-3">
                 <button
+                  type="button"
                   onClick={() => setAmount('custom')}
-                  className={`py-3 px-4 rounded-lg border-2 font-semibold transition-all ${
+                  className={`rounded-full border px-5 py-3 font-extrabold transition ${
                     amount === 'custom'
-                      ? 'border-primary-600 bg-primary-50 text-primary-700'
-                      : 'border-secondary-200 hover:border-primary-300'
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border bg-background/60 text-foreground hover:border-primary/50'
                   }`}
                 >
                   Custom
                 </button>
                 {amount === 'custom' && (
-                  <div className="flex-1 relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
+                  <div className="relative flex-1">
+                    <DollarSign className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     <input
                       type="number"
                       min="1"
                       value={customAmount}
-                      onChange={(e) => setCustomAmount(e.target.value)}
+                      onChange={(event) => setCustomAmount(event.target.value)}
                       placeholder="Enter amount"
-                      className="input pl-10 w-full"
+                      className="input pl-11"
                     />
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Display Name */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-secondary-700">
-                Display Name
-              </label>
+            <div className="grid gap-4 sm:grid-cols-2">
               <input
                 type="text"
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your name"
+                onChange={(event) => setDisplayName(event.target.value)}
+                placeholder="Name"
                 disabled={isAnonymous}
-                className="input w-full"
+                className="input"
               />
+              <input type="email" placeholder="Email" className="input" />
             </div>
 
-            {/* Anonymous Option */}
-            <div className="flex items-center gap-2">
+            <label className="flex items-center gap-3 text-sm font-semibold text-muted-foreground">
               <input
                 type="checkbox"
-                id="anonymous"
                 checked={isAnonymous}
-                onChange={(e) => setIsAnonymous(e.target.checked)}
-                className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
+                onChange={(event) => setIsAnonymous(event.target.checked)}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
-              <label htmlFor="anonymous" className="text-sm text-secondary-700">
-                Donate anonymously
-              </label>
-            </div>
+              Donate anonymously
+            </label>
 
-            {/* Message */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-secondary-700">
-                Message (Optional)
-              </label>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Leave a message of support..."
-                maxLength={200}
-                rows={3}
-                className="input w-full resize-none"
-              />
-              <p className="text-xs text-secondary-500 mt-1">
-                {message.length}/200 characters
-              </p>
-            </div>
+            <textarea
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              placeholder="Leave a message of support..."
+              maxLength={200}
+              rows={4}
+              className="textarea"
+            />
 
-            {/* Donate Button */}
-            <button
-              onClick={handleDonate}
-              className="btn btn-primary w-full text-lg py-4 shadow-lg hover:shadow-xl transition-all"
-            >
-              <Heart className="w-5 h-5 mr-2" fill="currentColor" />
+            <button onClick={handleDonate} className="btn btn-primary w-full py-4 text-base">
+              <Send className="h-5 w-5" />
               Donate ${amount === 'custom' ? customAmount || '0' : amount}
             </button>
-
-            <p className="text-xs text-center text-secondary-500">
-              Your donation will be processed securely. We never store your payment information.
-            </p>
           </div>
         </div>
       </div>

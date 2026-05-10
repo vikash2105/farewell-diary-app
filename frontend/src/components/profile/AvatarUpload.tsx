@@ -76,10 +76,10 @@ export default function AvatarUpload({ currentAvatar, onUpload, onRemove }: Avat
       <div className="relative group">
         <div className="
           w-32 h-32 rounded-full 
-          bg-gradient-to-br from-primary-100 to-primary-200
+          bg-primary/10
           flex items-center justify-center
           overflow-hidden
-          border-4 border-white
+          border-4 border-background
           shadow-xl
           transition-transform duration-300
           group-hover:scale-105
@@ -92,7 +92,7 @@ export default function AvatarUpload({ currentAvatar, onUpload, onRemove }: Avat
             />
           ) : (
             <svg
-              className="w-16 h-16 text-primary-400"
+              className="w-16 h-16 text-primary/50"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -118,9 +118,9 @@ export default function AvatarUpload({ currentAvatar, onUpload, onRemove }: Avat
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="
-              bg-white text-secondary-900
+              bg-background text-foreground
               p-3 rounded-full
-              hover:bg-secondary-100
+              hover:bg-muted
               transition-colors
               disabled:opacity-50
             "
@@ -134,9 +134,9 @@ export default function AvatarUpload({ currentAvatar, onUpload, onRemove }: Avat
               onClick={handleRemove}
               disabled={uploading}
               className="
-                bg-red-500 text-white
+                bg-destructive text-destructive-foreground
                 p-3 rounded-full
-                hover:bg-red-600
+                hover:opacity-90
                 transition-colors
                 ml-2
                 disabled:opacity-50
@@ -169,21 +169,21 @@ export default function AvatarUpload({ currentAvatar, onUpload, onRemove }: Avat
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
-        className="mt-4 text-primary-600 hover:text-primary-700 font-medium text-sm disabled:opacity-50"
+        className="mt-4 text-sm font-bold text-primary hover:opacity-80 disabled:opacity-50"
       >
         Change drawing
       </button>
 
       {/* Error Message */}
       {error && (
-        <div className="mt-2 text-red-600 text-sm text-center">
+        <div className="mt-2 text-center text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Help Text */}
-      <p className="mt-2 text-secondary-500 text-xs text-center">
-        JPEG, PNG, WebP, or GIF • Max 2MB
+      <p className="mt-2 text-center text-xs text-muted-foreground">
+        JPEG, PNG, WebP, or GIF. Max 2MB
       </p>
     </div>
   );

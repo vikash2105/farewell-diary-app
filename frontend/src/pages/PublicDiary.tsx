@@ -1,11 +1,8 @@
-/**
- * PublicDiary.tsx - Trust & Context Page
- */
-
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Heart, Shield, Lock, Edit, User, CheckCircle } from 'lucide-react';
-import { diaryApi, notesApi, authApi } from '../api';
+import { CheckCircle, Edit, Heart, Lock, Shield, User } from 'lucide-react';
+import { authApi, diaryApi, notesApi } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 import { useAuthStore } from '../stores/authStore';
 import { rememberAuthReturnUrl, toAbsoluteFrontendUrl } from '../utils/authRedirect';
 
@@ -37,7 +34,6 @@ export default function PublicDiary() {
     if (!link) return;
 
     const writePath = `/write/${link}`;
-
     if (!isAuthenticated) {
       rememberAuthReturnUrl(writePath);
       authApi.loginWithGoogle(toAbsoluteFrontendUrl(writePath));
@@ -49,163 +45,102 @@ export default function PublicDiary() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-50">
-        <div className="h-12 w-12 rounded-full border-4 border-primary-200 border-t-primary-600 animate-spin" />
+      <div className="site-shell flex items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
       </div>
     );
   }
 
   if (!diaryData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-50">
-        <div className="bg-white rounded-3xl shadow-xl p-10 text-center max-w-md">
-          <Heart className="w-14 h-14 text-red-500 mx-auto mb-4" fill="currentColor" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-            Diary Not Found
-          </h2>
-          <p className="text-gray-600">
-            This link is invalid or no longer active.
-          </p>
+      <div className="site-shell flex items-center justify-center px-4">
+        <div className="sanctuary-card max-w-md p-10 text-center">
+          <Heart className="mx-auto mb-4 h-14 w-14 text-destructive" fill="currentColor" />
+          <h2 className="mb-2 text-2xl font-bold">Diary Not Found</h2>
+          <p className="text-muted-foreground">This link is invalid or no longer active.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 px-4 py-12">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex justify-center items-center mb-10 gap-2">
-          <Heart className="w-8 h-8 text-primary-600" fill="currentColor" />
-          <span className="text-2xl font-bold text-primary-700">
-            Farewell Diary
-          </span>
+    <div className="site-shell px-4 py-10">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Heart className="h-8 w-8 text-primary" fill="currentColor" />
+            <span className="brand-script text-3xl font-bold text-primary">Farewell Diary</span>
+          </div>
+          <ThemeToggle />
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
-          <div className="bg-gradient-to-r from-primary-50 to-secondary-50 px-8 py-6 border-b">
+        <div className="sanctuary-card overflow-hidden">
+          <div className="border-b border-border/60 bg-primary/10 px-8 py-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <User className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">
-                  This diary was shared with you by
-                </p>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <p className="text-sm text-muted-foreground">This diary was shared with you by</p>
+                <h2 className="text-xl font-bold text-foreground">
                   {diaryData.ownerName || 'Someone special'}
                 </h2>
               </div>
             </div>
           </div>
 
-          <div className="px-8 py-10 text-center border-b">
-            <Heart className="w-16 h-16 text-primary-600 mx-auto mb-4" fill="currentColor" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">
+          <div className="border-b border-border/60 px-8 py-10 text-center">
+            <Heart className="mx-auto mb-4 h-16 w-16 text-primary" fill="currentColor" />
+            <h1 className="brand-script mb-3 text-5xl font-bold text-primary">
               {diaryData.title}
             </h1>
             {diaryData.description && (
-              <p className="text-gray-600 max-w-xl mx-auto">
-                {diaryData.description}
-              </p>
+              <p className="mx-auto max-w-xl text-muted-foreground">{diaryData.description}</p>
             )}
           </div>
 
           <div className="p-8">
             {checkData?.isOwner ? (
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8 text-center">
-                <CheckCircle className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-blue-900 mb-2">
-                  This is your diary
-                </h3>
-                <p className="text-blue-800 mb-6">
-                  View all farewell messages from your dashboard.
-                </p>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="px-8 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
-                >
-                  Go to Dashboard
-                </button>
-              </div>
+              <StatusPanel
+                tone="info"
+                title="This is your diary"
+                message="View all farewell messages from your dashboard."
+                action="Go to Dashboard"
+                onAction={() => navigate('/dashboard')}
+              />
             ) : hasWritten ? (
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
-                <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-green-900 mb-2">
-                  Thank you
-                </h3>
-                <p className="text-green-800 mb-6">
-                  You have already written a farewell message.
-                </p>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="px-8 py-3 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition"
-                >
-                  Go to Dashboard
-                </button>
-              </div>
+              <StatusPanel
+                tone="success"
+                title="Thank you"
+                message="You have already written a farewell message."
+                action="Go to Dashboard"
+                onAction={() => navigate('/dashboard')}
+              />
             ) : (
-              <div className="space-y-6">
-                <div className="bg-primary-50 rounded-2xl p-6 border">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-primary-600" fill="currentColor" />
-                    What is Farewell Diary
-                  </h3>
-                  <p className="text-gray-700">
-                    A private space to write one meaningful message that will be
-                    preserved forever.
-                  </p>
-                </div>
-
-                <div className="bg-secondary-50 rounded-2xl p-6 border">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-secondary-600" />
-                    Why sign in
-                  </h3>
-                  <ul className="space-y-2 text-gray-700 text-sm">
-                    <li className="flex gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      Trusted and accountable messages
-                    </li>
-                    <li className="flex gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      Protection from spam
-                    </li>
-                    <li className="flex gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      Emotional safety
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-gray-50 rounded-2xl p-6 border">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-gray-600" />
-                    Privacy
-                  </h3>
-                  <ul className="space-y-2 text-gray-700 text-sm">
-                    <li className="flex gap-2">
-                      <CheckCircle className="w-4 h-4 text-primary-600" />
-                      Only the owner can read your message
-                    </li>
-                    <li className="flex gap-2">
-                      <CheckCircle className="w-4 h-4 text-primary-600" />
-                      One message per person
-                    </li>
-                  </ul>
-                </div>
+              <div className="space-y-5">
+                <InfoPanel
+                  icon={Heart}
+                  title="What is Farewell Diary"
+                  copy="A private space to write one meaningful message that will be preserved forever."
+                />
+                <InfoPanel
+                  icon={Shield}
+                  title="Why sign in"
+                  copy="Signed-in contributors help keep messages trusted, accountable, and protected from spam."
+                />
+                <InfoPanel
+                  icon={Lock}
+                  title="Privacy"
+                  copy="Only the owner can read your message, and each person can submit one note."
+                />
 
                 <div className="pt-4 text-center">
-                  <button
-                    onClick={handleWriteNote}
-                    className="px-10 py-4 rounded-2xl bg-primary-600 text-white font-semibold hover:bg-primary-700 transition flex items-center gap-3 mx-auto"
-                  >
-                    <Edit className="w-6 h-6" />
+                  <button onClick={handleWriteNote} className="btn btn-primary mx-auto px-8 py-4 text-base">
+                    <Edit className="h-5 w-5" />
                     Write a Farewell Message
                   </button>
-                  <p className="text-sm text-gray-500 mt-4">
-                    {isAuthenticated
-                      ? 'You are signed in'
-                      : 'Google sign in required'}
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    {isAuthenticated ? 'You are signed in.' : 'Google sign in required.'}
                   </p>
                 </div>
               </div>
@@ -213,10 +148,53 @@ export default function PublicDiary() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-8">
-          Powered by Farewell Diary
-        </p>
+        <p className="mt-8 text-center text-sm text-muted-foreground">Powered by Farewell Diary</p>
       </div>
+    </div>
+  );
+}
+
+function InfoPanel({
+  icon: Icon,
+  title,
+  copy,
+}: {
+  icon: typeof Heart;
+  title: string;
+  copy: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border/70 bg-muted/50 p-5">
+      <h3 className="mb-2 flex items-center gap-2 font-bold">
+        <Icon className="h-5 w-5 text-primary" />
+        {title}
+      </h3>
+      <p className="text-sm leading-6 text-muted-foreground">{copy}</p>
+    </div>
+  );
+}
+
+function StatusPanel({
+  tone,
+  title,
+  message,
+  action,
+  onAction,
+}: {
+  tone: 'info' | 'success';
+  title: string;
+  message: string;
+  action: string;
+  onAction: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-primary/20 bg-primary/10 p-8 text-center">
+      <CheckCircle className={`mx-auto mb-4 h-12 w-12 ${tone === 'success' ? 'text-green-600 dark:text-green-300' : 'text-primary'}`} />
+      <h3 className="mb-2 text-xl font-bold">{title}</h3>
+      <p className="mb-6 text-muted-foreground">{message}</p>
+      <button onClick={onAction} className="btn btn-primary px-8">
+        {action}
+      </button>
     </div>
   );
 }

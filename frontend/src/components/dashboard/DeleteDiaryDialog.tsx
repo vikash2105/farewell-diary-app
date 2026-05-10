@@ -64,18 +64,18 @@ export default function DeleteDiaryDialog({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         onSubmit={handleSubmit}
-        className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl border border-red-200"
+        className="sanctuary-card w-full max-w-lg overflow-hidden rounded-xl border-destructive/25"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-red-100 bg-red-50 px-5 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-destructive/15 bg-destructive/10 px-5 py-4">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 rounded-full bg-red-100 p-2 text-red-700">
+            <div className="mt-0.5 rounded-full bg-destructive/10 p-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <h2 id={titleId} className="text-lg font-semibold text-red-950">
+              <h2 id={titleId} className="text-lg font-bold text-foreground">
                 Delete diary
               </h2>
-              <p id={descriptionId} className="mt-1 text-sm text-red-800">
+              <p id={descriptionId} className="mt-1 text-sm text-destructive">
                 This action cannot be undone.
               </p>
             </div>
@@ -85,7 +85,7 @@ export default function DeleteDiaryDialog({
             type="button"
             onClick={onClose}
             disabled={isDeleting}
-            className="rounded-md p-1 text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md p-1 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close delete diary dialog"
           >
             <X className="h-5 w-5" />
@@ -93,13 +93,13 @@ export default function DeleteDiaryDialog({
         </div>
 
         <div className="space-y-5 px-5 py-5">
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+          <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-foreground">
             Permanently deleting <strong>{diary.title}</strong> will remove the
             diary and all related farewell contributions.
           </div>
 
           <label className="block">
-            <span className="text-sm font-medium text-secondary-900">
+            <span className="text-sm font-bold text-muted-foreground">
               Type the diary name to confirm
             </span>
             <input
@@ -109,24 +109,24 @@ export default function DeleteDiaryDialog({
               placeholder={diary.title}
               disabled={isDeleting}
               autoComplete="off"
-              className="mt-2 w-full rounded-lg border border-secondary-300 px-4 py-3 text-secondary-900 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-secondary-100"
+              className="input mt-2 disabled:cursor-not-allowed disabled:opacity-60"
             />
           </label>
         </div>
 
-        <div className="flex flex-col-reverse gap-3 border-t border-secondary-100 bg-secondary-50 px-5 py-4 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 border-t border-border/60 bg-muted/50 px-5 py-4 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onClose}
             disabled={isDeleting}
-            className="rounded-lg border border-secondary-300 bg-white px-4 py-2 font-medium text-secondary-700 transition hover:bg-secondary-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn btn-secondary rounded-lg px-4 py-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!isConfirmed || isDeleting}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-destructive px-4 py-2 font-semibold text-destructive-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
             Delete this diary

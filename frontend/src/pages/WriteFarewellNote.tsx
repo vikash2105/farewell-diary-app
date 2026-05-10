@@ -1,23 +1,15 @@
-/**
- * WriteFarewellNote.tsx - Contribution Editor
- * 
- * Route: /write/:link
- * Access: Requires authentication (enforced by ProtectedRoute)
- * 
- * Features:
- * - Font style selection
- * - Live preview (updates on every keystroke)
- * - Auto-save drafts
- * - Post-submission redirect to dashboard
- */
-
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Send, Type, Eye } from 'lucide-react';
+import { ArrowLeft, Eye, Heart, Send, Type } from 'lucide-react';
 import { toast } from 'sonner';
-import { notesApi, diaryApi } from '../api';
+import { diaryApi, notesApi } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 import { useAuthStore } from '../stores/authStore';
+
+type FontStyle = 'default' | 'handwriting' | 'serif' | 'cursive';
+
+const fontOptions: FontStyle[] = ['default', 'handwriting', 'serif', 'cursive'];
 
 export default function WriteFarewellNote() {
   const { link } = useParams<{ link: string }>();
@@ -25,9 +17,8 @@ export default function WriteFarewellNote() {
   const { isAuthenticated, user } = useAuthStore();
 
   const [content, setContent] = useState('');
-  const [fontStyle, setFontStyle] = useState<'default' | 'handwriting' | 'serif' | 'cursive'>('default');
+  const [fontStyle, setFontStyle] = useState<FontStyle>('default');
 
-  // Type inference from API client - no casting needed
   const { data: diaryResponse } = useQuery({
     queryKey: ['diaryPublic', link],
     queryFn: () => diaryApi.getByLink(link!),
@@ -36,40 +27,39 @@ export default function WriteFarewellNote() {
 
   const diary = diaryResponse?.data.data;
 
-  
-  // Load saved draft (only for authenticated users)
   useEffect(() => {
     if (!link || !isAuthenticated) return;
-    
-    const draftKey = `farewell_draft_${link}`;
-    const savedDraft = localStorage.getItem(draftKey);
 
-    if (savedDraft) {
-      try {
-        const { content: savedContent, fontStyle: savedFont } = JSON.parse(savedDraft);
-        if (savedContent) setContent(savedContent);
-        if (savedFont) setFontStyle(savedFont);
-      } catch (e) {
-        console.error('Failed to parse draft', e);
-      }
+    const savedDraft = localStorage.getItem(`farewell_draft_${link}`);
+    if (!savedDraft) return;
+
+    try {
+      const { content: savedContent, fontStyle: savedFont } = JSON.parse(savedDraft);
+      if (savedContent) setContent(savedContent);
+      if (savedFont) setFontStyle(savedFont);
+    } catch (error) {
+      console.error('Failed to parse draft', error);
     }
   }, [link, isAuthenticated]);
 
+  useEffect(() => {
+    if (!link || !isAuthenticated) return;
+    localStorage.setItem(`farewell_draft_${link}`, JSON.stringify({ content, fontStyle }));
+  }, [content, fontStyle, link, isAuthenticated]);
+
   const createNoteMutation = useMutation({
-    mutationFn: () => notesApi.create(link!, {
-      content,
-      fontStyle,
-      isAnonymous: false,
-    }),
+    mutationFn: () =>
+      notesApi.create(link!, {
+        content,
+        fontStyle,
+        isAnonymous: false,
+      }),
     onSuccess: () => {
-      // Clear draft on success
       localStorage.removeItem(`farewell_draft_${link}`);
-      
-      toast.success('✅ Your farewell note was submitted successfully!', {
+      toast.success('Your farewell note was submitted successfully!', {
         duration: 3000,
       });
-      
-      // ✅ NEW: Redirect to dashboard after submission
+
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
@@ -79,10 +69,9 @@ export default function WriteFarewellNote() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
 
-    // Validation
     if (content.trim().length < 10) {
       toast.error('Please write at least 10 characters');
       return;
@@ -91,101 +80,116 @@ export default function WriteFarewellNote() {
     createNoteMutation.mutate();
   };
 
-  // Auto-save draft
-  useEffect(() => {
-      if (!link || !isAuthenticated) return;
-      const draftKey = `farewell_draft_${link}`;
-      localStorage.setItem(draftKey, JSON.stringify({ content, fontStyle }));
-  }, [content, fontStyle, link, isAuthenticated]);
-
   const getFontClass = (style: string) => {
     switch (style) {
-      case 'handwriting': return 'font-handwriting';
-      case 'serif': return 'font-serif';
-      case 'cursive': return 'font-cursive';
-      default: return 'font-sans';
+      case 'handwriting':
+        return 'font-handwriting';
+      case 'serif':
+        return 'font-serif';
+      case 'cursive':
+        return 'font-cursive';
+      default:
+        return 'font-default';
     }
   };
 
-  // Show loading if not authenticated (will redirect)
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="site-shell flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to sign in...</p>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+          <p className="text-muted-foreground">Redirecting to sign in...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 md:py-12">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">Write Your Farewell Note</h1>
-        {diary && (
-             <p className="text-center text-secondary-600 mb-8">
-                 Writing for <span className="font-semibold">{diary.title}</span>
-             </p>
-        )}
-        {!diary && <div className="mb-8 h-6"></div>}
+    <div className="site-shell">
+      <header className="border-b border-border/60 bg-background/90 shadow-sm backdrop-blur-xl">
+        <nav className="page-container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Heart className="h-7 w-7 text-primary" fill="currentColor" />
+            <span className="brand-script text-3xl font-bold text-primary">Farewell Diary</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button onClick={() => navigate('/dashboard')} className="btn btn-secondary">
+              <ArrowLeft className="h-5 w-5" />
+              <span className="hidden md:inline">Dashboard</span>
+            </button>
+          </div>
+        </nav>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* EDITOR COLUMN */}
+      <main className="page-container py-8 md:py-12">
+        <h1 className="brand-script mb-2 text-center text-5xl font-bold text-primary">
+          Write Your Farewell Note
+        </h1>
+        {diary ? (
+          <p className="mb-8 text-center text-muted-foreground">
+            Writing for <span className="font-bold text-foreground">{diary.title}</span>
+          </p>
+        ) : (
+          <div className="mb-8 h-6" />
+        )}
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Type className="w-5 h-5 text-primary-600" />
+            <div className="sanctuary-card p-6">
+              <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
+                <Type className="h-5 w-5 text-primary" />
                 Compose
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Font Selection */}
                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Font Style</label>
-                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {['default', 'handwriting', 'serif', 'cursive'].map((style) => (
-                        <button
-                          key={style}
-                          type="button"
-                          onClick={() => setFontStyle(style as any)}
-                          className={`px-3 py-2 border rounded-lg text-sm transition-all ${
-                            fontStyle === style
-                              ? 'border-primary-600 bg-primary-50 text-primary-700 font-medium ring-2 ring-primary-100'
-                              : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                          }`}
-                        >
-                          {style.charAt(0).toUpperCase() + style.slice(1)}
-                        </button>
-                      ))}
-                   </div>
+                  <label className="mb-2 block text-sm font-bold text-muted-foreground">
+                    Font Style
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {fontOptions.map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => setFontStyle(style)}
+                        className={`rounded-lg border px-3 py-2 text-sm transition-all ${
+                          fontStyle === style
+                            ? 'border-primary bg-primary/10 font-bold text-primary ring-2 ring-primary/20'
+                            : 'border-border text-muted-foreground hover:border-primary/50'
+                        }`}
+                      >
+                        {style.charAt(0).toUpperCase() + style.slice(1)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Content Editor */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                  <label className="mb-2 block text-sm font-bold text-muted-foreground">
+                    Message
+                  </label>
                   <textarea
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className={`w-full h-64 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none text-lg leading-relaxed ${getFontClass(fontStyle)}`}
+                    onChange={(event) => setContent(event.target.value)}
+                    className={`textarea h-64 text-lg leading-relaxed ${getFontClass(fontStyle)}`}
                     placeholder="Write your heartfelt message here..."
                     required
                   />
-                  <div className="text-right text-xs text-gray-400 mt-1">
+                  <div className="mt-2 text-right text-xs text-muted-foreground">
                     {content.length} characters
                   </div>
                 </div>
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={createNoteMutation.isPending}
-                  className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-semibold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="btn btn-primary w-full py-4 text-lg"
                 >
                   {createNoteMutation.isPending ? (
-                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   ) : (
-                     <Send className="w-5 h-5" />
+                    <Send className="h-5 w-5" />
                   )}
                   Submit Farewell Note
                 </button>
@@ -193,54 +197,49 @@ export default function WriteFarewellNote() {
             </div>
           </div>
 
-          {/* PREVIEW COLUMN */}
-          <div className="hidden lg:block space-y-6">
-             <div className="sticky top-8">
-                <div className="flex items-center justify-between mb-4">
-                   <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <Eye className="w-5 h-5 text-primary-600" />
-                      Live Preview
-                   </h2>
-                   <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                      What the owner sees
-                   </span>
+          <div className="hidden space-y-6 lg:block">
+            <div className="sticky top-8">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-xl font-bold">
+                  <Eye className="h-5 w-5 text-primary" />
+                  Live Preview
+                </h2>
+                <span className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">
+                  What the owner sees
+                </span>
+              </div>
+
+              <div className="sanctuary-card relative flex min-h-[400px] flex-col overflow-hidden p-8">
+                <div className="pointer-events-none absolute left-4 top-4 text-primary/10">
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M14.017 21v-3c0-1.105.895-2 2-2h3c.552 0 1-.448 1-1V9c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1v2c0 .552-.448 1-1 1h-1V5h10v10c0 3.314-2.686 6-6 6h-2Zm-9 0v-3c0-1.105.895-2 2-2h3c.552 0 1-.448 1-1V9c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1v2c0 .552-.448 1-1 1h-1V5h10v10c0 3.314-2.686 6-6 6h-2Z" />
+                  </svg>
                 </div>
 
-                {/* Preview Card */}
-                <div className={`bg-white p-8 rounded-2xl shadow-lg border border-gray-100 min-h-[400px] flex flex-col relative overflow-hidden transition-all duration-300`}>
-                   {/* Decorative Quote Mark */}
-                   <div className="absolute top-4 left-4 text-primary-100 opacity-50 pointer-events-none">
-                      <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
-                         <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z" />
-                      </svg>
-                   </div>
-
-                   {/* Content */}
-                   <div className={`relative z-10 flex-grow whitespace-pre-wrap text-gray-800 leading-relaxed text-lg ${getFontClass(fontStyle)}`}>
-                      {content || <span className="text-gray-300 italic">Your message will appear here...</span>}
-                   </div>
-
-                   {/* Footer */}
-                   <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold bg-primary-100 text-primary-600">
-                            {(user?.name || 'You').charAt(0).toUpperCase()}
-                         </div>
-                         <div className="flex flex-col">
-                            <span className="font-semibold text-gray-900">
-                               {user?.name || 'Your Name'}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                               {new Date().toLocaleDateString()}
-                            </span>
-                         </div>
-                      </div>
-                   </div>
+                <div className={`relative z-10 flex-grow whitespace-pre-wrap text-lg leading-relaxed text-foreground ${getFontClass(fontStyle)}`}>
+                  {content || <span className="italic text-muted-foreground/50">Your message will appear here...</span>}
                 </div>
-             </div>
+
+                <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+                      {(user?.name || 'You').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-foreground">
+                        {user?.name || 'Your Name'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date().toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -21,17 +21,17 @@ export default function DiaryFilters({ filter, onFilterChange, counts }: DiaryFi
   ] as const;
 
   return (
-    <div className="flex gap-2 bg-white rounded-xl p-2 shadow-sm border border-secondary-200">
+    <div className="flex gap-2 rounded-full border border-border/70 bg-card/75 p-1.5 shadow-sm backdrop-blur">
       {filters.map((f) => (
         <button
           key={f.id}
           onClick={() => onFilterChange(f.id)}
           className={`
-            px-6 py-2 rounded-lg font-medium transition-all duration-200
+            rounded-full px-5 py-2 font-bold transition-all duration-200
             ${
               filter === f.id
-                ? 'bg-primary-500 text-white shadow-md'
-                : 'text-secondary-600 hover:bg-secondary-100'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }
           `}
         >
@@ -42,8 +42,8 @@ export default function DiaryFilters({ filter, onFilterChange, counts }: DiaryFi
                 ml-2 px-2 py-0.5 rounded-full text-xs font-semibold
                 ${
                   filter === f.id
-                    ? 'bg-white/20 text-white'
-                    : 'bg-secondary-200 text-secondary-600'
+                    ? 'bg-white/20 text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 }
               `}
             >

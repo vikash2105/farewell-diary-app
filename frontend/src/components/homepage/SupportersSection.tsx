@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Heart } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { Heart } from 'lucide-react';
 import { dummyDonations } from '../../data/dummyData';
 
 interface Donation {
@@ -16,79 +16,66 @@ export default function SupportersSection() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${API_BASE_URL}/public/donations`);
+        const data = await response.json();
+
+        setDonations(data.success && data.data?.length > 0 ? data.data : dummyDonations);
+      } catch (error) {
+        console.error('Error fetching donations:', error);
+        setDonations(dummyDonations);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchDonations();
   }, []);
 
-const fetchDonations = async () => {
-  try {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${API_BASE_URL}/public/donations`);
-    const data = await response.json();
-    
-    // ✅ Use real data if available, otherwise use dummy data
-    if (data.success && data.data && data.data.length > 0) {
-      setDonations(data.data);
-    } else {
-      // Use dummy data to make homepage look professional
-      setDonations(dummyDonations);
-    }
-  } catch (error) {
-    console.error('Error fetching donations:', error);
-    // On error, use dummy data
-    setDonations(dummyDonations);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  if (isLoading) {
-    return null;
-  }
+  if (isLoading) return null;
 
   return (
-    <section className="py-20 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Our Supporters</h2>
-          <p className="text-secondary-600 max-w-2xl mx-auto">
-            These amazing people help keep Farewell Diary ad-free and accessible to everyone
+    <section className="py-20">
+      <div className="page-container">
+        <div className="mb-12 text-center">
+          <span className="section-kicker mb-5">Our Supporters</span>
+          <h2 className="brand-script text-5xl font-bold text-primary">
+            Kept free by kind people.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            These supporters help keep Farewell Diary ad-free and accessible.
           </p>
         </div>
 
         {donations.length === 0 ? (
-          <div className="text-center py-12 card">
-            <Heart className="w-16 h-16 text-primary-300 mx-auto mb-4" />
-            <p className="text-secondary-600">
-              Be the first to support this project!
-            </p>
+          <div className="sanctuary-card mx-auto max-w-xl p-10 text-center">
+            <Heart className="mx-auto mb-4 h-14 w-14 text-primary/50" />
+            <p className="text-muted-foreground">Be the first to support this project.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {donations.map((donation) => (
-              <div
-                key={donation.id}
-                className="card p-6 hover:shadow-lg transition-shadow border-l-4 border-primary-500"
-              >
-                <div className="flex items-start justify-between mb-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {donations.slice(0, 6).map((donation) => (
+              <article key={donation.id} className="sanctuary-card p-6">
+                <div className="mb-4 flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-lg text-primary-700">
-                      {donation.displayName}
-                    </p>
-                    <p className="text-sm text-secondary-500">
+                    <p className="font-bold text-primary">{donation.displayName}</p>
+                    <p className="text-sm text-muted-foreground">
                       {formatDistanceToNow(new Date(donation.createdAt), { addSuffix: true })}
                     </p>
                   </div>
-                  <span className="font-bold text-primary-600 text-xl">
+                  <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-extrabold text-primary">
                     {donation.amount}
                   </span>
                 </div>
-                
+
                 {donation.message && (
-                  <p className="text-secondary-700 text-sm italic border-l-2 border-secondary-200 pl-3">
-                    "{donation.message}"
+                  <p className="border-l-2 border-primary/30 pl-4 text-sm italic leading-6 text-muted-foreground">
+                    &quot;{donation.message}&quot;
                   </p>
                 )}
-              </div>
+              </article>
             ))}
           </div>
         )}

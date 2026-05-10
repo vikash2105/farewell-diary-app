@@ -80,7 +80,7 @@ export default function ProfileForm({ initialData, onSave }: ProfileFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-secondary-900 mb-2">
+        <label htmlFor="name" className="mb-2 block text-sm font-bold text-muted-foreground">
           My Name
         </label>
         <input
@@ -88,13 +88,7 @@ export default function ProfileForm({ initialData, onSave }: ProfileFormProps) {
           type="text"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="
-            w-full px-4 py-3 
-            bg-white border-2 border-secondary-200 
-            rounded-xl
-            focus:border-primary-400 focus:ring-2 focus:ring-primary-200 
-            transition-all
-          "
+          className="input"
           placeholder="Alex Rivers"
           required
           minLength={2}
@@ -104,7 +98,7 @@ export default function ProfileForm({ initialData, onSave }: ProfileFormProps) {
 
       {/* Username */}
       <div>
-        <label htmlFor="username" className="block text-sm font-medium text-secondary-900 mb-2">
+        <label htmlFor="username" className="mb-2 block text-sm font-bold text-muted-foreground">
           Username
         </label>
         <input
@@ -112,25 +106,19 @@ export default function ProfileForm({ initialData, onSave }: ProfileFormProps) {
           type="text"
           value={formData.username}
           onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })}
-          className="
-            w-full px-4 py-3 
-            bg-white border-2 border-secondary-200 
-            rounded-xl
-            focus:border-primary-400 focus:ring-2 focus:ring-primary-200 
-            transition-all
-          "
+          className="input"
           placeholder="alex_sketches"
           minLength={3}
           maxLength={50}
         />
-        <p className="mt-1 text-xs text-secondary-500">
+        <p className="mt-2 text-xs text-muted-foreground">
           Letters, numbers, and underscores only
         </p>
       </div>
 
       {/* Bio */}
       <div>
-        <label htmlFor="bio" className="block text-sm font-medium text-secondary-900 mb-2">
+        <label htmlFor="bio" className="mb-2 block text-sm font-bold text-muted-foreground">
           My Story
         </label>
         <textarea
@@ -138,18 +126,11 @@ export default function ProfileForm({ initialData, onSave }: ProfileFormProps) {
           value={formData.bio}
           onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
           rows={4}
-          className="
-            w-full px-4 py-3 
-            bg-white border-2 border-secondary-200 
-            rounded-xl
-            focus:border-primary-400 focus:ring-2 focus:ring-primary-200 
-            transition-all
-            resize-none
-          "
+          className="textarea"
           placeholder="Memory collector, doodle enthusiast, and professional over-thinker. Saving all the good bits of life here."
           maxLength={500}
         />
-        <div className="mt-1 flex justify-between text-xs text-secondary-500">
+        <div className="mt-2 flex justify-between text-xs text-muted-foreground">
           <span>Tell us about yourself</span>
           <span>{formData.bio.length}/500</span>
         </div>
@@ -157,14 +138,14 @@ export default function ProfileForm({ initialData, onSave }: ProfileFormProps) {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Success Message */}
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+        <div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-300">
           Profile updated successfully!
         </div>
       )}
@@ -173,16 +154,7 @@ export default function ProfileForm({ initialData, onSave }: ProfileFormProps) {
       <button
         type="submit"
         disabled={!hasChanges || saving}
-        className="
-          w-full py-3 px-6
-          bg-primary-500 hover:bg-primary-600
-          text-white font-medium
-          rounded-xl
-          flex items-center justify-center gap-2
-          transition-all duration-200
-          disabled:opacity-50 disabled:cursor-not-allowed
-          shadow-lg hover:shadow-xl
-        "
+        className="btn btn-primary w-full py-3"
       >
         {saving ? (
           <>

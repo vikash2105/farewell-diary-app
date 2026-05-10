@@ -14,66 +14,59 @@ export default function TestimonialsSection() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${API_BASE_URL}/public/testimonials`);
+        const data = await response.json();
+
+        setTestimonials(data.success && data.data?.length > 0 ? data.data : dummyTestimonials);
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        setTestimonials(dummyTestimonials);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchTestimonials();
   }, []);
 
- const fetchTestimonials = async () => {
-  try {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${API_BASE_URL}/public/testimonials`);
-    const data = await response.json();
-    
-    // ✅ Use real data if available, otherwise use dummy data
-    if (data.success && data.data && data.data.length > 0) {
-      setTestimonials(data.data);
-    } else {
-      // Use dummy data to make homepage look professional
-      setTestimonials(dummyTestimonials);
-    }
-  } catch (error) {
-    console.error('Error fetching testimonials:', error);
-    // On error, use dummy data
-    setTestimonials(dummyTestimonials);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
   if (isLoading) {
     return (
-      <section className="py-16 px-4 bg-secondary-50">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-secondary-600">Loading testimonials...</p>
+      <section id="testimonials" className="py-16">
+        <div className="page-container text-center">
+          <p className="text-muted-foreground">Loading testimonials...</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-white to-secondary-50">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-4">
-          What People Are Saying
-        </h2>
-        <p className="text-center text-secondary-600 mb-12 max-w-2xl mx-auto">
-          Real stories from people who've found comfort in preserving precious memories
-        </p>
+    <section id="testimonials" className="py-20">
+      <div className="page-container">
+        <div className="mb-12 max-w-2xl">
+          <span className="section-kicker mb-5">Letters</span>
+          <h2 className="brand-script text-5xl font-bold text-primary">
+            What people are saying.
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            Real stories from people who found comfort in preserving precious memories.
+          </p>
+        </div>
 
-        {/* Horizontal scrolling carousel */}
         <div className="relative overflow-hidden">
           <div className="flex gap-6 animate-scroll-horizontal pb-6">
             {testimonials.concat(testimonials).map((testimonial, index) => (
               <div
                 key={`${testimonial.id}-${index}`}
-                className="flex-shrink-0 w-80 card p-6 hover:shadow-xl transition-shadow"
+                className="glass-panel w-80 flex-shrink-0 rounded-xl p-6 transition-transform hover:-translate-y-1"
               >
-                <Quote className="w-8 h-8 text-primary-400 mb-4" />
-                <p className="text-secondary-700 mb-4 line-clamp-4">
-                  "{testimonial.message}"
+                <Quote className="mb-4 h-8 w-8 text-primary/50" />
+                <p className="mb-5 line-clamp-4 text-foreground">
+                  &quot;{testimonial.message}&quot;
                 </p>
-                <p className="font-semibold text-primary-600">
-                  — {testimonial.name}
-                </p>
+                <p className="font-bold text-primary">{testimonial.name}</p>
               </div>
             ))}
           </div>

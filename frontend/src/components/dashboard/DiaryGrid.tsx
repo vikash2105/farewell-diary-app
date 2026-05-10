@@ -23,16 +23,16 @@ export default function DiaryGrid({
   // Loading state
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="rounded-2xl p-6 border-2 border-secondary-200 bg-secondary-100 animate-pulse"
+            className="sanctuary-card animate-pulse rounded-xl p-6"
           >
-            <div className="h-6 bg-secondary-300 rounded mb-4 w-3/4"></div>
-            <div className="h-4 bg-secondary-300 rounded mb-2 w-full"></div>
-            <div className="h-4 bg-secondary-300 rounded mb-4 w-2/3"></div>
-            <div className="h-4 bg-secondary-300 rounded w-1/2"></div>
+            <div className="mb-4 h-6 w-3/4 rounded bg-muted"></div>
+            <div className="mb-2 h-4 w-full rounded bg-muted"></div>
+            <div className="mb-4 h-4 w-2/3 rounded bg-muted"></div>
+            <div className="h-4 w-1/2 rounded bg-muted"></div>
           </div>
         ))}
       </div>
@@ -43,9 +43,9 @@ export default function DiaryGrid({
   if (diaries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="w-24 h-24 bg-secondary-100 rounded-full flex items-center justify-center mb-6">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-muted">
           <svg
-            className="w-12 h-12 text-secondary-400"
+            className="h-12 w-12 text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -58,10 +58,10 @@ export default function DiaryGrid({
             />
           </svg>
         </div>
-        <h3 className="text-xl font-semibold text-secondary-900 mb-2">
+        <h3 className="mb-2 text-xl font-bold text-foreground">
           No diaries yet
         </h3>
-        <p className="text-secondary-600 text-center mb-6 max-w-md">
+        <p className="mb-6 max-w-md text-center text-muted-foreground">
           Create your first diary to start collecting precious memories and farewell messages.
         </p>
         <button
@@ -76,7 +76,7 @@ export default function DiaryGrid({
 
   // Grid with diaries
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {diaries.map((diary, index) => (
         <DiaryCard
           key={diary.id}

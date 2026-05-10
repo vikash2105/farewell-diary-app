@@ -7,7 +7,7 @@ export default function NoteCard({ note }: { note: FarewellNote }) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <p className="font-semibold text-lg">{note.authorName}</p>
-          <p className="text-sm text-secondary-500">
+          <p className="text-sm text-muted-foreground">
             {formatDistanceToNow(new Date(note.createdAt), { addSuffix: true })}
           </p>
         </div>

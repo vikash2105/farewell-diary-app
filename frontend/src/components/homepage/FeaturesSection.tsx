@@ -1,61 +1,68 @@
-import { Shield, Users, BookOpen, Heart, Lock, Link2 } from 'lucide-react';
-
 const features = [
   {
-    icon: Shield,
-    title: "Completely Private",
-    description: "End-to-end encryption ensures your notes are eyes-only. Contributors can write but never read."
+    title: 'Completely Private',
+    image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=900&q=80',
+    description: 'Contributors can write, but the diary stays private to its owner.',
+    rotate: '-rotate-2',
   },
   {
-    icon: Lock,
-    title: "Secure by Design",
-    description: "Military-grade encryption, secure authentication, and privacy-first architecture."
+    title: 'From Heart',
+    image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=80',
+    description: 'A focused writing experience for messages that need room to breathe.',
+    rotate: 'rotate-1 translate-y-4',
   },
   {
-    icon: Users,
-    title: "Easy Sharing",
-    description: "Share a unique link with friends. They login securely and write their farewell."
+    title: 'Legacy Vault',
+    image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=900&q=80',
+    description: 'A lasting archive for memories, letters, and final words.',
+    rotate: '-rotate-1 md:-translate-y-3',
   },
   {
-    icon: Link2,
-    title: "No Downloads Needed",
-    description: "Everything works in your browser. Access from anywhere, anytime."
-  },
-  {
-    icon: BookOpen,
-    title: "Beautiful Presentation",
-    description: "Choose from handwriting, serif, or cursive fonts for emotional expression."
-  },
-  {
-    icon: Heart,
-    title: "Forever Yours",
-    description: "Keep these precious memories safe and accessible whenever you need them."
+    title: 'Peace of Mind',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80',
+    description: 'A gentle product surface for emotionally meaningful moments.',
+    rotate: 'rotate-2 translate-y-2',
   },
 ];
 
 export default function FeaturesSection() {
   return (
-    <section className="py-20 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Why Farewell Diary?</h2>
-          <p className="text-xl text-secondary-600 max-w-2xl mx-auto">
-            A secure, private platform designed with care for your most precious memories
+    <section id="memories" className="py-20">
+      <div className="page-container">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <span className="section-kicker mb-5">Why Farewell Diary?</span>
+          <h2 className="brand-script text-5xl font-bold text-primary">
+            A sanctuary for the words people keep.
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            Industrial-ready does not have to feel cold. The app keeps workflows clear,
+            responsive, and polished while preserving the emotional warmth of a diary.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="card p-6 hover:shadow-xl transition-all hover:-translate-y-1 duration-300"
+        <div className="grid gap-7 md:grid-cols-4">
+          {features.map((feature) => (
+            <article
+              key={feature.title}
+              className={`group relative ${feature.rotate} transition-transform duration-300 hover:rotate-0 hover:translate-y-0`}
             >
-              <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mb-4">
-                <feature.icon className="w-7 h-7 text-primary-600" />
+              <div className="sanctuary-card relative flex aspect-[4/5] flex-col rounded-xl p-4 pb-8">
+                <div className="polaroid-tape" />
+                <div className="mb-5 min-h-0 flex-1 overflow-hidden rounded-lg border border-border/60 bg-[hsl(var(--surface-strong))]">
+                  <img
+                    src={feature.image}
+                    alt={feature.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <h3 className="brand-script text-center text-3xl font-bold text-primary">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 text-center text-sm leading-6 text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-secondary-600">{feature.description}</p>
-            </div>
+            </article>
           ))}
         </div>
       </div>

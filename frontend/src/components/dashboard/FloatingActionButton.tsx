@@ -15,8 +15,8 @@ export default function FloatingActionButton() {
       className="
         fixed bottom-8 right-8
         w-16 h-16
-        bg-primary-600 hover:bg-primary-700
-        text-white
+        bg-primary
+        text-primary-foreground
         rounded-full
         shadow-2xl
         flex items-center justify-center
@@ -33,7 +33,7 @@ export default function FloatingActionButton() {
       {/* Tooltip */}
       <div className="
         absolute bottom-full right-0 mb-2
-        bg-secondary-900 text-white text-sm
+        bg-foreground text-background text-sm
         px-3 py-2 rounded-lg
         whitespace-nowrap
         opacity-0 group-hover:opacity-100
@@ -46,7 +46,7 @@ export default function FloatingActionButton() {
       {/* Ripple effect on hover */}
       <div className="
         absolute inset-0 rounded-full
-        bg-primary-400 opacity-0
+        bg-primary opacity-0
         group-hover:opacity-20
         animate-ping
       " />
