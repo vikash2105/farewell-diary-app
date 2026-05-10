@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/userService';
 import { logger } from '../utils/logger';
+import { env } from '../config/env';
 
 export class AuthController {
   static async getCurrentUser(req: Request, res: Response): Promise<void> {
@@ -64,11 +65,12 @@ export class AuthController {
             return;
           }
 
-          // ✅ CRITICAL FIX: Clear cookie with same options as when it was set
+  const isProduction = env.NODE_ENV === 'production';
+
           res.clearCookie('farewell.sid', {
             httpOnly: true,
-            secure: true,
-            sameSite: 'none',
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
           });
           
           res.json({
