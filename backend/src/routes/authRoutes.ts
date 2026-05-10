@@ -32,11 +32,10 @@ router.get(
         ? req.query.callbackUrl
         : undefined;
     const authenticate = () =>
-      passport.authenticate('google', { scope: ['profile', 'email'] })(
-        req,
-        res,
-        next
-      );
+      passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        prompt: 'select_account',
+      })(req, res, next);
 
     if (callbackUrl && req.session) {
       req.session.oauthCallbackUrl = getSafeRedirectUrl(callbackUrl);

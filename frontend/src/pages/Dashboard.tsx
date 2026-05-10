@@ -18,7 +18,8 @@ import { toast } from 'sonner';
 import DiaryGrid from '../components/dashboard/DiaryGrid';
 import DiaryFilters from '../components/dashboard/DiaryFilters';
 import FloatingActionButton from '../components/dashboard/FloatingActionButton';
-import { diaryApi } from '../api';
+import DeleteDiaryDialog from '../components/dashboard/DeleteDiaryDialog';
+import { authApi, diaryApi } from '../api';
 import { DashboardDiary } from '../types';
 import { useAuthStore } from '../stores/authStore';
 import { consumeAuthReturnUrl } from '../utils/authRedirect';
@@ -30,6 +31,9 @@ export default function Dashboard() {
   const [diaries, setDiaries] = useState<DashboardDiary[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'shared' | 'private'>('all');
+  const [diaryPendingDelete, setDiaryPendingDelete] =
+    useState<DashboardDiary | null>(null);
+  const [deletingDiaryId, setDeletingDiaryId] = useState<string | null>(null);
 
   // Profile dropdown state
   const [profileOpen, setProfileOpen] = useState(false);
@@ -70,6 +74,46 @@ export default function Dashboard() {
       setDiaries([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setProfileOpen(false);
+
+    try {
+      await authApi.logout();
+    } catch (error) {
+      if ((error as any)?.response?.status === 401) {
+        logout();
+        navigate('/', { replace: true });
+        return;
+      }
+
+      console.error('Failed to destroy server session:', error);
+      toast.error('Could not fully sign out. Please try again.');
+      return;
+    }
+
+    logout();
+    navigate('/', { replace: true });
+  };
+
+  const handleDeleteDiary = async () => {
+    if (!diaryPendingDelete) return;
+
+    setDeletingDiaryId(diaryPendingDelete.id);
+
+    try {
+      await diaryApi.delete(diaryPendingDelete.id);
+      setDiaries((currentDiaries) =>
+        currentDiaries.filter((diary) => diary.id !== diaryPendingDelete.id)
+      );
+      toast.success('Diary deleted successfully');
+      setDiaryPendingDelete(null);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to delete diary');
+    } finally {
+      setDeletingDiaryId(null);
     }
   };
 
@@ -133,10 +177,7 @@ export default function Dashboard() {
                 </button>
 
                 <button
-                  onClick={() => {
-                    logout();
-                    navigate('/');
-                  }}
+                  onClick={handleLogout}
                   className="w-full px-4 py-3 flex items-center gap-3 text-red-600 hover:bg-red-50 transition"
                 >
                   <LogOut className="w-4 h-4" />
@@ -204,12 +245,29 @@ export default function Dashboard() {
 
         {/* Diary Grid */}
         {diaries.length > 0 && (
-          <DiaryGrid diaries={filteredDiaries} loading={loading} />
+          <DiaryGrid
+            diaries={filteredDiaries}
+            loading={loading}
+            onDeleteDiary={setDiaryPendingDelete}
+          />
         )}
 
         {/* Floating Action Button */}
         <FloatingActionButton />
       </main>
+
+      {diaryPendingDelete && (
+        <DeleteDiaryDialog
+          diary={diaryPendingDelete}
+          isDeleting={deletingDiaryId === diaryPendingDelete.id}
+          onClose={() => {
+            if (!deletingDiaryId) {
+              setDiaryPendingDelete(null);
+            }
+          }}
+          onConfirm={handleDeleteDiary}
+        />
+      )}
     </div>
   );
 }

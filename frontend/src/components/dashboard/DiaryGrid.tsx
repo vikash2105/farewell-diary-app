@@ -10,9 +10,14 @@ import { DashboardDiary } from '../../types';
 interface DiaryGridProps {
   diaries: DashboardDiary[];
   loading?: boolean;
+  onDeleteDiary: (diary: DashboardDiary) => void;
 }
 
-export default function DiaryGrid({ diaries, loading = false }: DiaryGridProps) {
+export default function DiaryGrid({
+  diaries,
+  loading = false,
+  onDeleteDiary,
+}: DiaryGridProps) {
   const navigate = useNavigate();
 
   // Loading state
@@ -78,6 +83,7 @@ export default function DiaryGrid({ diaries, loading = false }: DiaryGridProps) 
           diary={diary}
           colorIndex={index}
           onClick={() => navigate(`/notes?diaryId=${diary.id}`)}
+          onDeleteClick={() => onDeleteDiary(diary)}
         />
       ))}
     </div>

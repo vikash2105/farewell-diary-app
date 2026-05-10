@@ -3,7 +3,7 @@
  * Displays a single diary card on the dashboard with pastel colors
  */
 
-import { Heart, Users, Clock } from 'lucide-react';
+import { Heart, Users, Clock, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { DashboardDiary } from '../../types';
 
@@ -11,6 +11,7 @@ interface DiaryCardProps {
   diary: DashboardDiary;
   colorIndex: number;
   onClick: () => void;
+  onDeleteClick: () => void;
 }
 
 const pastelColors = [
@@ -22,7 +23,12 @@ const pastelColors = [
   'bg-indigo-100 hover:bg-indigo-200 border-indigo-300',
 ];
 
-export default function DiaryCard({ diary, colorIndex, onClick }: DiaryCardProps) {
+export default function DiaryCard({
+  diary,
+  colorIndex,
+  onClick,
+  onDeleteClick,
+}: DiaryCardProps) {
   const colorClass = pastelColors[colorIndex % pastelColors.length];
   const timeAgo = formatDistanceToNow(new Date(diary.updatedAt), { addSuffix: true });
 
@@ -39,6 +45,19 @@ export default function DiaryCard({ diary, colorIndex, onClick }: DiaryCardProps
         group
       `}
     >
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onDeleteClick();
+        }}
+        className="absolute right-4 top-4 z-20 rounded-full bg-white/80 p-2 text-red-600 shadow-sm transition hover:bg-red-50 hover:text-red-700 focus:bg-red-50"
+        aria-label={`Delete ${diary.title}`}
+        title="Delete diary"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+
       {/* Diary Icon */}
       <div className="absolute top-4 left-4 opacity-20 group-hover:opacity-30 transition-opacity">
         <Heart className="w-12 h-12" fill="currentColor" />

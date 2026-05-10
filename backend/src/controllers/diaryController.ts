@@ -144,6 +144,17 @@ export class DiaryController {
     res.json({ success: true, data: diary });
   }
 
+  static async deleteDiary(req: Request, res: Response): Promise<void> {
+    if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
+
+    await DiaryService.delete(req.params.id, req.user.id);
+
+    res.json({
+      success: true,
+      message: "Diary deleted successfully",
+    });
+  }
+
   static async regenerateLink(req: Request, res: Response): Promise<void> {
     if (!req.user || !req.user.id) throw new ApiError(401, "Authentication required");
 

@@ -57,6 +57,12 @@ export const diaryApi = {
     apiClient.put<ApiResponse<Diary>>(`/diary/${id}`, data),
 
   /**
+   * Permanently delete a diary owned by the current user.
+   */
+  delete: (id: string) =>
+    apiClient.delete<ApiResponse>(`/diary/${id}`),
+
+  /**
    * Regenerate diary share link
    */
   regenerateLink: (id: string) =>

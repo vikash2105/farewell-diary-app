@@ -149,6 +149,28 @@ export class DiaryService {
     return updated;
   }
 
+  static async delete(id: string, userId: string): Promise<void> {
+    try {
+      const deleted = await db
+        .delete(diaries)
+        .where(and(eq(diaries.id, id), eq(diaries.userId, userId)))
+        .returning({ id: diaries.id });
+
+      if (!deleted.length) {
+        throw new ApiError(404, "Diary not found or unauthorized");
+      }
+
+      logger.info("Diary deleted", { diaryId: id, userId });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+
+      logger.error("Error deleting diary", error);
+      throw new ApiError(500, "Error deleting diary");
+    }
+  }
+
   static async validateAccess(uniqueLink: string) {
     const diary = await this.findByLink(uniqueLink);
 

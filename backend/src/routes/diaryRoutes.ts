@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { DiaryController } from '../controllers/diaryController';
 import { isAuthenticated } from '../middleware/auth';
-import { validateBody } from '../middleware/validator';
-import { createDiarySchema } from '../utils/validation';
+import { validateBody, validateParams } from '../middleware/validator';
+import { createDiarySchema, uuidSchema } from '../utils/validation';
 import { sanitizeInput } from '../middleware/sanitize';
 import { limitRequestSize, LIMITS } from '../middleware/requestSizeLimit';
 import { z } from 'zod';
@@ -76,6 +76,20 @@ router.put(
     })
   ),
   DiaryController.updateDiary
+);
+
+/**
+ * @route   DELETE /api/v1/diary/:id
+ * @desc    Permanently delete a diary owned by the current user
+ * @access  Private
+ *
+ * Notes are deleted by the database foreign key cascade.
+ */
+router.delete(
+  '/:id',
+  isAuthenticated,
+  validateParams(z.object({ id: uuidSchema })),
+  DiaryController.deleteDiary
 );
 
 /**

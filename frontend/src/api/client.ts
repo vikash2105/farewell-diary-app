@@ -36,6 +36,10 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response, // Pass through successful responses
   (error) => {
+    if ((error.config as any)?.skipAuthRedirect) {
+      return Promise.reject(error);
+    }
+
     // Only handle 401 errors
     if (error.response?.status === 401) {
       const currentRoute = getCurrentRoute();

@@ -18,7 +18,9 @@ export const authApi = {
    * Logout user
    */
   logout: () =>
-    apiClient.post<ApiResponse>('/auth/logout'),
+    apiClient.post<ApiResponse>('/auth/logout', undefined, {
+      skipAuthRedirect: true,
+    } as any),
 
   /**
    * Start Google OAuth login
