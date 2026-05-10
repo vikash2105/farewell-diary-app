@@ -157,6 +157,154 @@
     @apply sanctuary-card p-6 hover:-translate-y-0.5;
   }
 
+  .diary-stage {
+    @apply relative bg-background text-foreground;
+    background:
+      radial-gradient(circle at 18% 16%, hsl(345 100% 89% / 0.48), transparent 32rem),
+      radial-gradient(circle at 82% 18%, hsl(42 96% 87% / 0.52), transparent 30rem),
+      linear-gradient(135deg, hsl(340 100% 98%), hsl(37 76% 92%) 46%, hsl(329 60% 95%));
+  }
+
+  .dark .diary-stage {
+    background:
+      radial-gradient(circle at 16% 14%, hsl(345 80% 32% / 0.3), transparent 28rem),
+      radial-gradient(circle at 82% 20%, hsl(40 45% 23% / 0.45), transparent 30rem),
+      linear-gradient(135deg, hsl(320 8% 7%), hsl(342 16% 12%) 48%, hsl(32 19% 13%));
+  }
+
+  .diary-stage::before {
+    @apply pointer-events-none absolute inset-0;
+    content: "";
+    background-image:
+      linear-gradient(120deg, hsl(0 0% 100% / 0.24), transparent 36%),
+      radial-gradient(hsl(342 34% 29% / 0.08) 0.7px, transparent 0.7px);
+    background-size: auto, 20px 20px;
+  }
+
+  .diary-glass-button {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/40 bg-white/30 px-4 text-sm font-black text-primary shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/50 dark:border-white/10 dark:bg-white/10 dark:text-primary;
+  }
+
+  .diary-cover-book {
+    @apply relative h-[min(70vh,620px)] min-h-[460px] w-[min(86vw,520px)] overflow-hidden rounded-[1.4rem] border border-rose-100/20 bg-primary text-left shadow-[0_42px_90px_hsl(342_60%_20%/0.42)] outline-none;
+    background:
+      linear-gradient(90deg, hsl(344 49% 24%), hsl(344 42% 38%) 18%, hsl(344 39% 44%) 72%, hsl(342 42% 30%)),
+      radial-gradient(hsl(0 0% 100% / 0.13) 0.8px, transparent 0.8px);
+    background-blend-mode: normal, overlay;
+    background-size: auto, 7px 7px;
+    transform-origin: 48% 50%;
+  }
+
+  .diary-cover-book::after {
+    @apply pointer-events-none absolute inset-4 rounded-[1rem] border border-rose-100/25;
+    content: "";
+    box-shadow: inset 0 0 0 1px hsl(344 20% 12% / 0.24), inset 0 0 42px hsl(0 0% 100% / 0.08);
+  }
+
+  .diary-cover-pages {
+    @apply absolute -right-3 bottom-5 top-5 w-10 rounded-r-2xl bg-stone-100 shadow-[-12px_0_26px_hsl(342_60%_12%/0.24)];
+    background-image: repeating-linear-gradient(to bottom, hsl(28 42% 83%), hsl(28 42% 83%) 1px, hsl(35 64% 94%) 1px, hsl(35 64% 94%) 7px);
+  }
+
+  .diary-cover-spine {
+    @apply absolute bottom-0 left-0 top-0 w-20;
+    background: linear-gradient(90deg, hsl(343 45% 20%), hsl(344 42% 35% / 0.68), transparent);
+    box-shadow: inset -12px 0 24px hsl(0 0% 100% / 0.06);
+  }
+
+  .diary-cover-sheen {
+    @apply pointer-events-none absolute inset-0;
+    background: linear-gradient(120deg, transparent 12%, hsl(0 0% 100% / 0.18) 38%, transparent 55%);
+    transform: translateX(-28%);
+  }
+
+  .diary-book-open {
+    filter: drop-shadow(0 40px 60px hsl(342 35% 18% / 0.28));
+    transform-style: preserve-3d;
+  }
+
+  .diary-book-spine {
+    @apply absolute bottom-3 left-1/2 top-3 z-20 hidden w-10 -translate-x-1/2 rounded-full lg:block;
+    background: linear-gradient(90deg, hsl(26 33% 66% / 0.15), hsl(344 27% 35% / 0.34), hsl(26 33% 66% / 0.12));
+    box-shadow: inset 12px 0 22px hsl(0 0% 0% / 0.12), inset -12px 0 24px hsl(0 0% 100% / 0.16);
+  }
+
+  .diary-page-stack {
+    @apply absolute bottom-4 top-4 hidden rounded-2xl bg-stone-100 lg:block;
+    background-image: repeating-linear-gradient(to bottom, hsl(30 36% 82%), hsl(30 36% 82%) 1px, hsl(42 74% 96%) 1px, hsl(42 74% 96%) 8px);
+  }
+
+  .diary-page-stack-left {
+    @apply left-2 right-1/2 -mr-1;
+    transform: translateZ(-18px) rotateY(1deg);
+  }
+
+  .diary-page-stack-right {
+    @apply left-1/2 right-2 -ml-1;
+    transform: translateZ(-18px) rotateY(-1deg);
+  }
+
+  .diary-spread-grid {
+    @apply grid h-full gap-4 overflow-y-auto lg:grid-cols-2 lg:gap-0 lg:overflow-visible;
+  }
+
+  .diary-page {
+    @apply relative overflow-hidden border border-stone-300/80 p-6 text-stone-900 shadow-[0_22px_42px_hsl(342_32%_20%/0.18),inset_0_0_34px_hsl(33_54%_74%/0.28)] dark:border-white/10 dark:text-stone-100 sm:p-9;
+    min-height: min(680px, calc(100vh - 8.5rem));
+  }
+
+  .diary-page-left {
+    @apply rounded-2xl lg:rounded-l-2xl lg:rounded-r-none;
+  }
+
+  .diary-page-right {
+    @apply rounded-2xl lg:rounded-r-2xl lg:rounded-l-none;
+  }
+
+  .diary-message-page {
+    @apply rounded-2xl;
+  }
+
+  .diary-paper-texture {
+    background:
+      linear-gradient(90deg, hsl(31 54% 82% / 0.22), transparent 12%, transparent 88%, hsl(31 54% 82% / 0.26)),
+      radial-gradient(circle at 20% 18%, hsl(0 0% 100% / 0.68), transparent 13rem),
+      radial-gradient(hsl(27 24% 38% / 0.08) 0.7px, transparent 0.7px),
+      linear-gradient(135deg, hsl(43 86% 96%), hsl(30 74% 91%));
+    background-size: auto, auto, 13px 13px, auto;
+  }
+
+  .dark .diary-paper-texture {
+    background:
+      linear-gradient(90deg, hsl(31 54% 26% / 0.22), transparent 12%, transparent 88%, hsl(31 54% 22% / 0.26)),
+      radial-gradient(circle at 20% 18%, hsl(0 0% 100% / 0.08), transparent 13rem),
+      radial-gradient(hsl(27 44% 84% / 0.06) 0.7px, transparent 0.7px),
+      linear-gradient(135deg, hsl(31 18% 17%), hsl(342 16% 13%));
+  }
+
+  .diary-lined-paper {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 31px,
+      hsl(344 28% 60% / 0.22) 32px
+    );
+  }
+
+  .diary-control-button {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-full border border-stone-300/80 bg-white/40 px-4 text-sm font-black text-primary shadow-sm transition hover:-translate-y-0.5 hover:bg-white/60 disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-white/10;
+  }
+
+  .diary-icon-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-300/80 bg-white/40 text-primary shadow-sm transition hover:-translate-y-0.5 hover:bg-white/60 disabled:pointer-events-none disabled:opacity-35 dark:border-white/10 dark:bg-white/10;
+  }
+
+  @media (min-width: 1024px) {
+    .diary-page {
+      min-height: 100%;
+    }
+  }
+
   .font-handwriting .note-content,
   .font-handwriting.note-content {
     font-family: "Caveat", cursive;
