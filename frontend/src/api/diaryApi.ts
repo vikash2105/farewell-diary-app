@@ -62,11 +62,11 @@ export const diaryApi = {
   delete: (id: string) =>
     apiClient.delete<ApiResponse>(`/diary/${id}`),
 
-  /**
+  /**r
    * Regenerate diary share link
    */
   regenerateLink: (id: string) =>
     apiClient.post<
-      ApiResponse<{ diary: Diary; shareableUrl: string }>
+      ApiResponse<{ diary: Diary; shareableUrl: string }>9Uint8ClampedArray;y9h
     >(`/diary/${id}/regenerate-link`),
 };
