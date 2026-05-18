@@ -22,7 +22,7 @@ const PgSession = connectPgSimple(session);
 export const createApp = (): Application => {
   const app = express();
 
-  // 🔥 REQUIRED for Render
+  // REQUIRED FOR RENDER
   app.set("trust proxy", 1);
 
   app.use(
@@ -32,12 +32,12 @@ export const createApp = (): Application => {
     })
   );
 
-  // 🔥 CORS HARDENED FOR PRODUCTION
+  // CORS
   const allowedOrigins = [
     "https://farewelldiary.in",
     "https://www.farewelldiary.in",
     "http://localhost:5173",
-    "http://localhost:3000"
+    "http://localhost:3000",
   ];
 
   app.use(
@@ -68,14 +68,18 @@ export const createApp = (): Application => {
     })
   );
 
+  // DATABASE POOL
   const pgPool = new Pool({
     connectionString: env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl:
+      env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false,
   });
 
   const isProduction = env.NODE_ENV === "production";
 
-  // 🔥 SESSION CONFIGURATION - PRODUCTION SAFE
+  // SESSION
   app.use(
     session({
       name: "farewell.sid",
@@ -87,29 +91,48 @@ export const createApp = (): Application => {
       secret: env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
-      proxy: true, // Required for Render
+      proxy: true,
       cookie: {
         httpOnly: true,
-        secure: isProduction, // ✅ Secure in prod (HTTPS), false in dev
-        sameSite: isProduction ? "none" : "lax", // ✅ None required for cross-site cookies
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        domain: isProduction ? undefined : undefined // Let browser handle domain unless sharing subdomains
       },
     })
   );
 
+  // RATE LIMITER
   app.use(generalLimiter);
 
+  // PASSPORT
   configurePassport();
+
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.use(`/api/${env.API_VERSION}`, routes);
-
-  app.get("/", (_req: Request, res: Response) => {
-    res.json({ success: true, message: "Farewell Diary API is running" });
+  // =========================
+  // KEEP ALIVE ROUTE
+  // =========================
+  app.get("/ping", (_req: Request, res: Response) => {
+    return res.status(200).json({
+      success: true,
+      message: "Server is awake",
+      timestamp: new Date().toISOString(),
+    });
   });
 
+  // ROOT ROUTE
+  app.get("/", (_req: Request, res: Response) => {
+    res.json({
+      success: true,
+      message: "Farewell Diary API is running",
+    });
+  });
+
+  // API ROUTES
+  app.use(`/api/${env.API_VERSION}`, routes);
+
+  // ERROR HANDLERS
   app.use(notFoundHandler);
   app.use(errorHandler);
 
