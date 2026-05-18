@@ -36,14 +36,14 @@ export const diaryApi = {
     apiClient.get<ApiResponse<DashboardDiary[]>>('/diary'),
 
   /**
-   * Get public diary by link (for contributors - returns minimal data)
-   * Returns PublicDiary with only: title, description, isActive, ownerName
+   * Get public diary by link
+   * Returns minimal public diary data
    */
   getByLink: (link: string) =>
     apiClient.get<ApiResponse<PublicDiary>>(`/diary/${link}`),
 
   /**
-   * Get notes for current user's diary (optionally for specific diary)
+   * Get notes for current user's diary
    */
   getMyNotes: (diaryId?: string) =>
     apiClient.get<
@@ -57,16 +57,16 @@ export const diaryApi = {
     apiClient.put<ApiResponse<Diary>>(`/diary/${id}`, data),
 
   /**
-   * Permanently delete a diary owned by the current user.
+   * Permanently delete a diary
    */
   delete: (id: string) =>
     apiClient.delete<ApiResponse>(`/diary/${id}`),
 
-  /**r
+  /**
    * Regenerate diary share link
    */
   regenerateLink: (id: string) =>
     apiClient.post<
-      ApiResponse<{ diary: Diary; shareableUrl: string }>9Uint8ClampedArray;y9h
+      ApiResponse<{ diary: Diary; shareableUrl: string }>
     >(`/diary/${id}/regenerate-link`),
 };
